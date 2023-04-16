@@ -1,5 +1,11 @@
 # AccuRating
 
+Library computing accurate ratings based on match results.
+
+## Usage
+
+Take a look at the unit test.
+
 ## Is AccuRating accurate?
 
 Yes. With the same data, AccuRating will return much more accurate ratings than chess ELO or EGD.
@@ -122,7 +128,3 @@ git clone https://github.com/lukaszlew/accurating
 poetry install
 poetry run pytest
 ```
-
-## Usage
-
-Take a look at the unit test.
