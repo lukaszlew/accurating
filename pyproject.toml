@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "ielo"
+name = "accurating"
 version = "0.1.0"
 description = ""
 authors = ["Lukasz Lew <lukasz.lew@gmail.com>"]
@@ -18,4 +18,4 @@ build-backend = "poetry.core.masonry.api"
 addopts = [
     "--import-mode=importlib",
 ]
-pythonpath = "ielo"
+pythonpath = "accurating"
