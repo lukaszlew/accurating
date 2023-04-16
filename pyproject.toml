@@ -19,3 +19,6 @@ build-backend = "poetry.core.masonry.api"
 addopts = [
     "--import-mode=importlib",
 ]
+
+[project.urls]
+"Homepage" = "https://github.com/lukaszlew/accurating"
