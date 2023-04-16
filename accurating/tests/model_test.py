@@ -68,7 +68,7 @@ import jax.numpy as jnp
 #     return json.load(f)
 
 
-def test_fit(do_log=False):
+def test_fit(do_log=True):
   true_elos = jnp.array([[8.0, 4.0], [2.0, 3.0], [0.0, 0.0],])
   p1s = []
   p2s = []
@@ -90,9 +90,9 @@ def test_fit(do_log=False):
     p1_win_prob=jnp.array(p1_win_probs),
     season=jnp.array(seasons),
   )
-  config = accurating.Config(elo_season_stability=0.0, max_steps=70, do_log=do_log)
+  config = accurating.Config(elo_season_stability=0.0, max_steps=100, do_log=do_log)
   model, _ = accurating.fit(test_data, config)
   elos = model.rating
   elos = elos - jnp.min(elos, axis=0, keepdims=True)
   err = jnp.linalg.norm(elos - jnp.array(true_elos))
-  assert err < 0.02, f'FAIL err={err:.2f}; results={model}'
+  assert err < 0.0001, f'FAIL err={err}; results={model}'
