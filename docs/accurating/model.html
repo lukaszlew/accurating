@@ -45,6 +45,18 @@
                         <li>
                                 <a class="function" href="#MatchResults.__init__">MatchResults</a>
                         </li>
+                        <li>
+                                <a class="variable" href="#MatchResults.p1">p1</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#MatchResults.p2">p2</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#MatchResults.p1_win_prob">p1_win_prob</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#MatchResults.season">season</a>
+                        </li>
                 </ul>
 
             </li>
@@ -53,6 +65,18 @@
                             <ul class="memberlist">
                         <li>
                                 <a class="function" href="#Config.__init__">Config</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Config.season_rating_stability">season_rating_stability</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Config.smoothing">smoothing</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Config.max_steps">max_steps</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Config.do_log">do_log</a>
                         </li>
                 </ul>
 
@@ -106,185 +130,229 @@
 </span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a>
 </span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a>
 </span><span id="L-16"><a href="#L-16"><span class="linenos"> 16</span></a><span class="k">def</span> <span class="nf">win_prob</span><span class="p">(</span><span class="n">rating</span><span class="p">,</span> <span class="n">opp_rating</span><span class="p">):</span>
-</span><span id="L-17"><a href="#L-17"><span class="linenos"> 17</span></a>    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="n">opp_rating</span><span class="o">-</span><span class="n">rating</span><span class="p">))</span>
-</span><span id="L-18"><a href="#L-18"><span class="linenos"> 18</span></a>    <span class="c1"># This is more understandable and equivalent:</span>
-</span><span id="L-19"><a href="#L-19"><span class="linenos"> 19</span></a>    <span class="c1"># return jnp.exp2(rating) / (jnp.exp2(rating) + jnp.exp2(opp_rating))</span>
-</span><span id="L-20"><a href="#L-20"><span class="linenos"> 20</span></a>
+</span><span id="L-17"><a href="#L-17"><span class="linenos"> 17</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Probability of win for given ratings.&quot;&quot;&quot;</span>
+</span><span id="L-18"><a href="#L-18"><span class="linenos"> 18</span></a>    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="n">opp_rating</span><span class="o">-</span><span class="n">rating</span><span class="p">))</span>
+</span><span id="L-19"><a href="#L-19"><span class="linenos"> 19</span></a>    <span class="c1"># This is more understandable and equivalent:</span>
+</span><span id="L-20"><a href="#L-20"><span class="linenos"> 20</span></a>    <span class="c1"># return jnp.exp2(rating) / (jnp.exp2(rating) + jnp.exp2(opp_rating))</span>
 </span><span id="L-21"><a href="#L-21"><span class="linenos"> 21</span></a>
-</span><span id="L-22"><a href="#L-22"><span class="linenos"> 22</span></a><span class="k">def</span> <span class="nf">log_win_prob</span><span class="p">(</span><span class="n">rating</span><span class="p">,</span> <span class="n">opp_rating</span><span class="p">):</span>
-</span><span id="L-23"><a href="#L-23"><span class="linenos"> 23</span></a>    <span class="c1"># return jnp.log2(win_prob(rating, opp_rating))</span>
-</span><span id="L-24"><a href="#L-24"><span class="linenos"> 24</span></a>    <span class="n">diff</span> <span class="o">=</span> <span class="n">opp_rating</span> <span class="o">-</span> <span class="n">rating</span>
-</span><span id="L-25"><a href="#L-25"><span class="linenos"> 25</span></a>    <span class="k">return</span> <span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="n">diff</span><span class="p">))</span>
-</span><span id="L-26"><a href="#L-26"><span class="linenos"> 26</span></a>
+</span><span id="L-22"><a href="#L-22"><span class="linenos"> 22</span></a>
+</span><span id="L-23"><a href="#L-23"><span class="linenos"> 23</span></a><span class="k">def</span> <span class="nf">log_win_prob</span><span class="p">(</span><span class="n">rating</span><span class="p">,</span> <span class="n">opp_rating</span><span class="p">):</span>
+</span><span id="L-24"><a href="#L-24"><span class="linenos"> 24</span></a>    <span class="c1"># return jnp.log2(win_prob(rating, opp_rating))</span>
+</span><span id="L-25"><a href="#L-25"><span class="linenos"> 25</span></a>    <span class="n">diff</span> <span class="o">=</span> <span class="n">opp_rating</span> <span class="o">-</span> <span class="n">rating</span>
+</span><span id="L-26"><a href="#L-26"><span class="linenos"> 26</span></a>    <span class="k">return</span> <span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="n">diff</span><span class="p">))</span>
 </span><span id="L-27"><a href="#L-27"><span class="linenos"> 27</span></a>
-</span><span id="L-28"><a href="#L-28"><span class="linenos"> 28</span></a><span class="k">def</span> <span class="nf">log_data_prob</span><span class="p">(</span><span class="n">p1_ratings</span><span class="p">,</span> <span class="n">p2_ratings</span><span class="p">,</span> <span class="n">p1_win_probs</span><span class="p">,</span> <span class="n">p2_win_probs</span><span class="p">):</span>
-</span><span id="L-29"><a href="#L-29"><span class="linenos"> 29</span></a>    <span class="n">winner_win_prob_log</span> <span class="o">=</span> <span class="n">p1_win_probs</span> <span class="o">*</span> \
-</span><span id="L-30"><a href="#L-30"><span class="linenos"> 30</span></a>        <span class="n">log_win_prob</span><span class="p">(</span><span class="n">p1_ratings</span><span class="p">,</span> <span class="n">p2_ratings</span><span class="p">)</span> <span class="o">+</span> <span class="n">p2_win_probs</span> <span class="o">*</span> \
-</span><span id="L-31"><a href="#L-31"><span class="linenos"> 31</span></a>        <span class="n">log_win_prob</span><span class="p">(</span><span class="n">p2_ratings</span><span class="p">,</span> <span class="n">p1_ratings</span><span class="p">)</span>
-</span><span id="L-32"><a href="#L-32"><span class="linenos"> 32</span></a>    <span class="n">mean_log_data_prob</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">winner_win_prob_log</span><span class="p">)</span>
-</span><span id="L-33"><a href="#L-33"><span class="linenos"> 33</span></a>    <span class="k">return</span> <span class="n">mean_log_data_prob</span>
-</span><span id="L-34"><a href="#L-34"><span class="linenos"> 34</span></a>
+</span><span id="L-28"><a href="#L-28"><span class="linenos"> 28</span></a>
+</span><span id="L-29"><a href="#L-29"><span class="linenos"> 29</span></a><span class="k">def</span> <span class="nf">log_data_prob</span><span class="p">(</span><span class="n">p1_ratings</span><span class="p">,</span> <span class="n">p2_ratings</span><span class="p">,</span> <span class="n">p1_win_probs</span><span class="p">,</span> <span class="n">p2_win_probs</span><span class="p">):</span>
+</span><span id="L-30"><a href="#L-30"><span class="linenos"> 30</span></a>    <span class="n">winner_win_prob_log</span> <span class="o">=</span> <span class="n">p1_win_probs</span> <span class="o">*</span> \
+</span><span id="L-31"><a href="#L-31"><span class="linenos"> 31</span></a>        <span class="n">log_win_prob</span><span class="p">(</span><span class="n">p1_ratings</span><span class="p">,</span> <span class="n">p2_ratings</span><span class="p">)</span> <span class="o">+</span> <span class="n">p2_win_probs</span> <span class="o">*</span> \
+</span><span id="L-32"><a href="#L-32"><span class="linenos"> 32</span></a>        <span class="n">log_win_prob</span><span class="p">(</span><span class="n">p2_ratings</span><span class="p">,</span> <span class="n">p1_ratings</span><span class="p">)</span>
+</span><span id="L-33"><a href="#L-33"><span class="linenos"> 33</span></a>    <span class="n">mean_log_data_prob</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">winner_win_prob_log</span><span class="p">)</span>
+</span><span id="L-34"><a href="#L-34"><span class="linenos"> 34</span></a>    <span class="k">return</span> <span class="n">mean_log_data_prob</span>
 </span><span id="L-35"><a href="#L-35"><span class="linenos"> 35</span></a>
-</span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-</span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a><span class="k">class</span> <span class="nc">MatchResults</span><span class="p">:</span>
-</span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Match data for AccuRating.</span>
-</span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a><span class="sd">    All attributes have a shape (match_count,).</span>
-</span><span id="L-40"><a href="#L-40"><span class="linenos"> 40</span></a>
-</span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a><span class="sd">    Attributes:</span>
-</span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a><span class="sd">        p1: Player 1 id (small integer).</span>
-</span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a><span class="sd">        p2: Player 2 id (small integer).</span>
-</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a><span class="sd">        p1_win_prob: 1.0 if p1 wins, 0.0 if p2 wins. Can be in [0.0, 1.0]</span>
-</span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a><span class="sd">        timestamp: Currently the timestamps have to be small integers.</span>
-</span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a>    <span class="n">p1</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
-</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a>    <span class="n">p2</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+</span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a>
+</span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+</span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a><span class="k">class</span> <span class="nc">MatchResults</span><span class="p">:</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Match data for AccuRating.</span>
+</span><span id="L-40"><a href="#L-40"><span class="linenos"> 40</span></a><span class="sd">    All attributes have a shape (match_count,).</span>
+</span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a>
+</span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a>    <span class="n">p1</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Player 1 id (small integer).&quot;&quot;&quot;</span>
+</span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a>
+</span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a>    <span class="n">p2</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Player 2 id (small integer).&quot;&quot;&quot;</span>
+</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a>
 </span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a>    <span class="n">p1_win_prob</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
-</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a>    <span class="n">timestamp</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;1.0 if p1 wins, 0.0 if p2 wins. Can be any number in [0.0, 1.0].&quot;&quot;&quot;</span>
 </span><span id="L-51"><a href="#L-51"><span class="linenos"> 51</span></a>
-</span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a>
-</span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-</span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a><span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
-</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;AccuRating configuration.</span>
-</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a>
-</span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a><span class="sd">    Attributes:</span>
-</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a><span class="sd">        time_rating_stability:</span>
-</span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a><span class="sd">            Currently the timestamps have to be small integers.</span>
-</span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a><span class="sd">            time_rating_stability=0 means that ratings at each timestamp are completly separate.</span>
-</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a><span class="sd">            time_rating_stability=inf means that ratings at each timestamp should be the same.</span>
+</span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a>    <span class="n">season</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+</span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Currently the seasons have to be small integers.&quot;&quot;&quot;</span>
+</span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a>
+</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a>
+</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+</span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a><span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;AccuRating configuration.&quot;&quot;&quot;</span>
+</span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a>
+</span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a>    <span class="n">season_rating_stability</span><span class="p">:</span> <span class="nb">float</span>
+</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Rating stability across seasons.</span>
 </span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a>
-</span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a><span class="sd">        smoothing:</span>
-</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a><span class="sd">            There are two sources of data:</span>
-</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a><span class="sd">                Match result: Winner probably has a higher rating than the looser.</span>
-</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a><span class="sd">                Match-making: Matched players probably have similar strength.</span>
-</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a><span class="sd">            Setting somothing to 0.0 ignorse match-making as and relies on the match result only.</span>
-</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a><span class="sd">            Setting smoothing to 1.0 ignorse match result and relies on match-making only.</span>
-</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a>
-</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a><span class="sd">            Typically, in the absence of data ratings assume a prior that the skill of a player some fixed value like 1000.</span>
-</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a><span class="sd">            This allows the rating to not escape to infinity when only losses or only wins are available.</span>
-</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a><span class="sd">            Smoothing essentially allows to specify that the looser (in every match) had a small chance of winning.</span>
-</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a><span class="sd">            This is also known as &#39;label smoothing&#39;.</span>
+</span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a><span class="sd">    Currently the seasons have to be small integers.</span>
+</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a><span class="sd">    season_rating_stability = 0 means that ratings at each season are completly separate.</span>
+</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a><span class="sd">    season_rating_stability = inf means that ratings at each season should be the same.&quot;&quot;&quot;</span>
+</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a>
+</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a>    <span class="n">smoothing</span><span class="p">:</span> <span class="nb">float</span>
+</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Balance between match results and player pairings as the sources of data.</span>
+</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a><span class="sd">    There are two sources of data:</span>
+</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a><span class="sd">    - Match result: Winner probably has a higher rating than the looser.</span>
+</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a><span class="sd">    - Player pairing: Matched players probably have similar strength.</span>
+</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a><span class="sd">    Setting smoothing to 0.0 ignorse player pairing as and would rely on the match result only.</span>
+</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a><span class="sd">    Setting smoothing to 1.0 ignorse match result would rely on player pairing only.</span>
 </span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a>
-</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a><span class="sd">        max_steps:</span>
-</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a><span class="sd">            Limits the number of passes over the dataset.</span>
-</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a>
-</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a><span class="sd">        do_log:</span>
-</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a><span class="sd">            Enables additional logging</span>
-</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a>
-</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a>    <span class="n">time_rating_stability</span><span class="p">:</span> <span class="nb">float</span>
-</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a>    <span class="n">smoothing</span><span class="p">:</span> <span class="nb">float</span>
-</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a>    <span class="n">max_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1_000_000</span>
-</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>    <span class="n">do_log</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a><span class="sd">    Typically, in the absence of data ratings assume a prior that the skill of a player some fixed value like 1000.</span>
+</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a><span class="sd">    This allows the rating to not escape to infinity when only losses or only wins are available.</span>
+</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a><span class="sd">    Smoothing essentially allows to specify that the looser (in every match) had a small chance of winning.</span>
+</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a><span class="sd">    This is also known as &#39;label smoothing&#39;.&quot;&quot;&quot;</span>
+</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a>
+</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a>    <span class="n">max_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1_000_000</span>
+</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Limits the number of passes over the dataset.&quot;&quot;&quot;</span>
+</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a>
+</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a>    <span class="n">do_log</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Enables additional logging.&quot;&quot;&quot;</span>
+</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>
 </span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>
-</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>
-</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a><span class="k">class</span> <span class="nc">Model</span><span class="p">:</span>
-</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Trained model.</span>
-</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>
-</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a><span class="sd">    Attributes:</span>
-</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a><span class="sd">        rating:</span>
-</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a><span class="sd">            Currently the timestamps have to be small integers.</span>
-</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a><span class="sd">            rating contains players&#39; rating at each timestam</span>
-</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a><span class="sd">            rating has a shape (player_count, max(timestamp)-1).</span>
-</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a>    <span class="n">rating</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a><span class="k">class</span> <span class="nc">Model</span><span class="p">:</span>
+</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Trained model.</span>
+</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>
+</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a><span class="sd">    Attributes:</span>
+</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a><span class="sd">        rating:</span>
+</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a><span class="sd">            Currently the seasons have to be small integers.</span>
+</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a><span class="sd">            rating contains players&#39; rating at each timestam</span>
+</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a><span class="sd">            rating has a shape (player_count, max(season)-1).</span>
+</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>    <span class="n">rating</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a>
 </span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>
-</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>
-</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
-</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>    <span class="n">data</span><span class="p">:</span> <span class="n">MatchResults</span><span class="p">,</span>
-</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>    <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span>
-</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Model</span><span class="p">:</span>
-</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Fits the model to data according to config.</span>
-</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a><span class="sd">    The time complexity is O(match_count * player_count * max(timestamp) * steps)</span>
-</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>    <span class="n">p1_win_probs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">p1_win_prob</span>
-</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>    <span class="n">p1_win_probs</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">config</span><span class="o">.</span><span class="n">smoothing</span><span class="p">)</span> <span class="o">*</span> \
-</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>        <span class="n">p1_win_probs</span> <span class="o">+</span> <span class="n">config</span><span class="o">.</span><span class="n">smoothing</span> <span class="o">*</span> <span class="mf">0.5</span>
-</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a>    <span class="n">p2_win_probs</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">p1_win_prob</span>
-</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>    <span class="n">p1s</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">p1</span>
-</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a>    <span class="n">p2s</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">p2</span>
-</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a>    <span class="n">seasons</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">timestamp</span>
-</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a>
-</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a>    <span class="n">player_count</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">p1s</span><span class="p">),</span> <span class="n">jnp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">p2s</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
-</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a>    <span class="n">season_count</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">seasons</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a>
-</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a>    <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span> <span class="o">=</span> <span class="n">p1s</span><span class="o">.</span><span class="n">shape</span>
-</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a>    <span class="k">assert</span> <span class="n">seasons</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
-</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a>    <span class="k">assert</span> <span class="n">p1s</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
-</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a>    <span class="k">assert</span> <span class="n">p2s</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
-</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a>    <span class="k">assert</span> <span class="n">p1_win_probs</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
-</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a>
-</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a>    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
-</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a>        <span class="n">ratings</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">]</span>
-</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a>        <span class="k">assert</span> <span class="n">ratings</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">player_count</span><span class="p">,</span> <span class="n">season_count</span><span class="p">)</span>
-</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a>        <span class="n">p1_ratings</span> <span class="o">=</span> <span class="n">ratings</span><span class="p">[</span><span class="n">p1s</span><span class="p">,</span> <span class="n">seasons</span><span class="p">]</span>
-</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a>        <span class="n">p2_ratings</span> <span class="o">=</span> <span class="n">ratings</span><span class="p">[</span><span class="n">p2s</span><span class="p">,</span> <span class="n">seasons</span><span class="p">]</span>
-</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a>
-</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a>        <span class="k">assert</span> <span class="n">p1_ratings</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
-</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a>        <span class="k">assert</span> <span class="n">p2_ratings</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
-</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>        <span class="n">mean_log_data_prob</span> <span class="o">=</span> <span class="n">log_data_prob</span><span class="p">(</span>
-</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a>            <span class="n">p1_ratings</span><span class="p">,</span> <span class="n">p2_ratings</span><span class="p">,</span> <span class="n">p1_win_probs</span><span class="p">,</span> <span class="n">p2_win_probs</span><span class="p">)</span>
-</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>        <span class="n">rating_season_divergence</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">time_rating_stability</span> <span class="o">*</span> \
-</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>            <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">ratings</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">ratings</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a>        <span class="n">geomean_data_prob</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="n">mean_log_data_prob</span><span class="p">)</span>
-</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a>        <span class="k">return</span> <span class="n">mean_log_data_prob</span> <span class="o">-</span> <span class="n">rating_season_divergence</span><span class="p">,</span> <span class="n">geomean_data_prob</span>
-</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a>
-</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a>        <span class="c1"># TODO: This is an experiment trying to evaluate ELO playing consistency. Try again and delete if does not work.</span>
-</span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a>        <span class="c1"># cons = params[&#39;consistency&#39;]</span>
-</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a>        <span class="c1"># p1_cons = jnp.take(cons, p1s)</span>
-</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a>        <span class="c1"># p2_cons = jnp.take(cons, p2s)</span>
-</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>        <span class="c1"># winner_win_prob_log = 0.0</span>
-</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a>        <span class="c1"># winner_win_prob_log += p1_win_probs * log_win_prob_diff(diff/jnp.exp(p1_cons)) + p2_win_probs * log_win_prob_diff(-diff/jnp.exp(p1_cons))</span>
-</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a>        <span class="c1"># winner_win_prob_log += p1_win_probs * log_win_prob_diff(diff/jnp.exp(p2_cons)) + p2_win_probs * log_win_prob_diff(-diff/jnp.exp(p2_cons))</span>
-</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a>        <span class="c1"># winner_win_prob_log /= 2</span>
-</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a>        <span class="c1"># return jnp.mean(winner_win_prob_log) - 0.005*jnp.mean(cons ** 2)</span>
-</span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a>
-</span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a>    <span class="c1"># Optimize for these params:</span>
-</span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a>    <span class="n">params</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">asdict</span><span class="p">(</span><span class="n">Model</span><span class="p">(</span><span class="n">rating</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
-</span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a>        <span class="p">[</span><span class="n">player_count</span><span class="p">,</span> <span class="n">season_count</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">)))</span>
-</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a>    <span class="c1"># &#39;consistency&#39;: jnp.zeros([player_count, season_count]),</span>
-</span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a>
-</span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a>    <span class="c1"># Momentum gradient descent with restarts</span>
-</span><span id="L-156"><a href="#L-156"><span class="linenos">156</span></a>    <span class="n">m_lr</span> <span class="o">=</span> <span class="mf">1.0</span>
-</span><span id="L-157"><a href="#L-157"><span class="linenos">157</span></a>    <span class="n">lr</span> <span class="o">=</span> <span class="mf">10000.</span>  <span class="c1"># initial learning rate</span>
-</span><span id="L-158"><a href="#L-158"><span class="linenos">158</span></a>    <span class="n">momentum</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
-</span><span id="L-159"><a href="#L-159"><span class="linenos">159</span></a>    <span class="n">last_params</span> <span class="o">=</span> <span class="n">params</span>
-</span><span id="L-160"><a href="#L-160"><span class="linenos">160</span></a>    <span class="n">last_eval</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-</span><span id="L-161"><a href="#L-161"><span class="linenos">161</span></a>    <span class="n">last_grad</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
-</span><span id="L-162"><a href="#L-162"><span class="linenos">162</span></a>    <span class="n">last_reset_step</span> <span class="o">=</span> <span class="mi">0</span>
-</span><span id="L-163"><a href="#L-163"><span class="linenos">163</span></a>
-</span><span id="L-164"><a href="#L-164"><span class="linenos">164</span></a>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">max_steps</span><span class="p">):</span>
-</span><span id="L-165"><a href="#L-165"><span class="linenos">165</span></a>        <span class="p">(</span><span class="nb">eval</span><span class="p">,</span> <span class="n">model_fit</span><span class="p">),</span> <span class="n">grad</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">has_aux</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">params</span><span class="p">)</span>
-</span><span id="L-166"><a href="#L-166"><span class="linenos">166</span></a>
-</span><span id="L-167"><a href="#L-167"><span class="linenos">167</span></a>        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">do_log</span><span class="p">:</span>
-</span><span id="L-168"><a href="#L-168"><span class="linenos">168</span></a>            <span class="n">ratings</span> <span class="o">=</span> <span class="n">grad</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">]</span>
-</span><span id="L-169"><a href="#L-169"><span class="linenos">169</span></a>            <span class="n">q</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">]</span> <span class="o">==</span>
-</span><span id="L-170"><a href="#L-170"><span class="linenos">170</span></a>                        <span class="n">last_params</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
-</span><span id="L-171"><a href="#L-171"><span class="linenos">171</span></a>            <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">100</span> <span class="ow">and</span> <span class="n">q</span> <span class="o">&gt;</span> <span class="mf">0.9</span><span class="p">:</span>
-</span><span id="L-172"><a href="#L-172"><span class="linenos">172</span></a>                <span class="k">break</span>
-</span><span id="L-173"><a href="#L-173"><span class="linenos">173</span></a>            <span class="nb">print</span><span class="p">(</span>
-</span><span id="L-174"><a href="#L-174"><span class="linenos">174</span></a>                <span class="sa">f</span><span class="s1">&#39;Step </span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s1">4</span><span class="si">}</span><span class="s1">: eval: </span><span class="si">{</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="nb">eval</span><span class="p">)</span><span class="si">}</span><span class="s1"> lr=</span><span class="si">{</span><span class="n">lr</span><span class="si">:</span><span class="s1">7</span><span class="si">}</span><span class="s1"> grad=</span><span class="si">{</span><span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ratings</span><span class="p">)</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-</span><span id="L-175"><a href="#L-175"><span class="linenos">175</span></a>        <span class="k">if</span> <span class="kc">False</span><span class="p">:</span>
-</span><span id="L-176"><a href="#L-176"><span class="linenos">176</span></a>            <span class="c1"># Standard batch gradient descent algorithm works too. Just use good LR.</span>
-</span><span id="L-177"><a href="#L-177"><span class="linenos">177</span></a>            <span class="n">params</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">,</span> <span class="n">g</span><span class="p">:</span> <span class="n">p</span> <span class="o">+</span> <span class="n">lr</span> <span class="o">*</span> <span class="n">g</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">grad</span><span class="p">)</span>
-</span><span id="L-178"><a href="#L-178"><span class="linenos">178</span></a>        <span class="k">else</span><span class="p">:</span>
-</span><span id="L-179"><a href="#L-179"><span class="linenos">179</span></a>            <span class="k">if</span> <span class="nb">eval</span> <span class="o">&lt;</span> <span class="n">last_eval</span><span class="p">:</span>
-</span><span id="L-180"><a href="#L-180"><span class="linenos">180</span></a>                <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">do_log</span><span class="p">:</span>
-</span><span id="L-181"><a href="#L-181"><span class="linenos">181</span></a>                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;reset to </span><span class="si">{</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="n">last_eval</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-</span><span id="L-182"><a href="#L-182"><span class="linenos">182</span></a>                <span class="n">lr</span> <span class="o">/=</span> <span class="mf">1.5</span>
-</span><span id="L-183"><a href="#L-183"><span class="linenos">183</span></a>                <span class="k">if</span> <span class="n">last_reset_step</span> <span class="o">==</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-</span><span id="L-184"><a href="#L-184"><span class="linenos">184</span></a>                    <span class="n">lr</span> <span class="o">/=</span> <span class="mi">4</span>
-</span><span id="L-185"><a href="#L-185"><span class="linenos">185</span></a>                <span class="n">last_reset_step</span> <span class="o">=</span> <span class="n">i</span>
-</span><span id="L-186"><a href="#L-186"><span class="linenos">186</span></a>                <span class="n">momentum</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
-</span><span id="L-187"><a href="#L-187"><span class="linenos">187</span></a>                <span class="c1"># momentum /= 2.</span>
-</span><span id="L-188"><a href="#L-188"><span class="linenos">188</span></a>                <span class="n">params</span><span class="p">,</span> <span class="nb">eval</span><span class="p">,</span> <span class="n">grad</span> <span class="o">=</span> <span class="n">last_params</span><span class="p">,</span> <span class="n">last_eval</span><span class="p">,</span> <span class="n">last_grad</span>
-</span><span id="L-189"><a href="#L-189"><span class="linenos">189</span></a>            <span class="k">else</span><span class="p">:</span>
-</span><span id="L-190"><a href="#L-190"><span class="linenos">190</span></a>                <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="n">last_reset_step</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-</span><span id="L-191"><a href="#L-191"><span class="linenos">191</span></a>                    <span class="n">lr</span> <span class="o">*=</span> <span class="mf">1.5</span>
-</span><span id="L-192"><a href="#L-192"><span class="linenos">192</span></a>                <span class="n">last_params</span><span class="p">,</span> <span class="n">last_eval</span><span class="p">,</span> <span class="n">last_grad</span> <span class="o">=</span> <span class="n">params</span><span class="p">,</span> <span class="nb">eval</span><span class="p">,</span> <span class="n">grad</span>
-</span><span id="L-193"><a href="#L-193"><span class="linenos">193</span></a>            <span class="n">momentum</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">m</span><span class="p">,</span> <span class="n">g</span><span class="p">:</span> <span class="n">m_lr</span> <span class="o">*</span> <span class="n">m</span> <span class="o">+</span> <span class="n">g</span><span class="p">,</span> <span class="n">momentum</span><span class="p">,</span> <span class="n">grad</span><span class="p">)</span>
-</span><span id="L-194"><a href="#L-194"><span class="linenos">194</span></a>            <span class="n">params</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="n">p</span> <span class="o">+</span> <span class="n">lr</span> <span class="o">*</span> <span class="n">m</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
-</span><span id="L-195"><a href="#L-195"><span class="linenos">195</span></a>    <span class="k">return</span> <span class="n">Model</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">),</span> <span class="n">model_fit</span>
+</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
+</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>    <span class="n">data</span><span class="p">:</span> <span class="n">MatchResults</span><span class="p">,</span>
+</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>    <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span>
+</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Model</span><span class="p">:</span>
+</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Fits the model to data according to config.</span>
+</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a><span class="sd">    The time complexity is O(match_count * player_count * max(season) * steps)</span>
+</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>    <span class="n">p1_win_probs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">p1_win_prob</span>
+</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>    <span class="n">p1_win_probs</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">config</span><span class="o">.</span><span class="n">smoothing</span><span class="p">)</span> <span class="o">*</span> \
+</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>        <span class="n">p1_win_probs</span> <span class="o">+</span> <span class="n">config</span><span class="o">.</span><span class="n">smoothing</span> <span class="o">*</span> <span class="mf">0.5</span>
+</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>    <span class="n">p2_win_probs</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">p1_win_prob</span>
+</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a>    <span class="n">p1s</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">p1</span>
+</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>    <span class="n">p2s</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">p2</span>
+</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a>    <span class="n">seasons</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">season</span>
+</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a>
+</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a>    <span class="n">player_count</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">p1s</span><span class="p">),</span> <span class="n">jnp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">p2s</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
+</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a>    <span class="n">season_count</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">seasons</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a>
+</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a>    <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span> <span class="o">=</span> <span class="n">p1s</span><span class="o">.</span><span class="n">shape</span>
+</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a>    <span class="k">assert</span> <span class="n">seasons</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
+</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a>    <span class="k">assert</span> <span class="n">p1s</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
+</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a>    <span class="k">assert</span> <span class="n">p2s</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
+</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a>    <span class="k">assert</span> <span class="n">p1_win_probs</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
+</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a>
+</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a>    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a>        <span class="n">ratings</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">]</span>
+</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a>        <span class="k">assert</span> <span class="n">ratings</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">player_count</span><span class="p">,</span> <span class="n">season_count</span><span class="p">)</span>
+</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a>        <span class="n">p1_ratings</span> <span class="o">=</span> <span class="n">ratings</span><span class="p">[</span><span class="n">p1s</span><span class="p">,</span> <span class="n">seasons</span><span class="p">]</span>
+</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a>        <span class="n">p2_ratings</span> <span class="o">=</span> <span class="n">ratings</span><span class="p">[</span><span class="n">p2s</span><span class="p">,</span> <span class="n">seasons</span><span class="p">]</span>
+</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a>
+</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a>        <span class="k">assert</span> <span class="n">p1_ratings</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
+</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a>        <span class="k">assert</span> <span class="n">p2_ratings</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
+</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a>        <span class="n">mean_log_data_prob</span> <span class="o">=</span> <span class="n">log_data_prob</span><span class="p">(</span>
+</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>            <span class="n">p1_ratings</span><span class="p">,</span> <span class="n">p2_ratings</span><span class="p">,</span> <span class="n">p1_win_probs</span><span class="p">,</span> <span class="n">p2_win_probs</span><span class="p">)</span>
+</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a>        <span class="n">rating_season_divergence</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">season_rating_stability</span> <span class="o">*</span> \
+</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>            <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">ratings</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">ratings</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>        <span class="n">geomean_data_prob</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="n">mean_log_data_prob</span><span class="p">)</span>
+</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a>        <span class="k">return</span> <span class="n">mean_log_data_prob</span> <span class="o">-</span> <span class="n">rating_season_divergence</span><span class="p">,</span> <span class="n">geomean_data_prob</span>
+</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a>
+</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a>        <span class="c1"># TODO: This is an experiment trying to evaluate ELO playing consistency. Try again and delete if does not work.</span>
+</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a>        <span class="c1"># cons = params[&#39;consistency&#39;]</span>
+</span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a>        <span class="c1"># p1_cons = jnp.take(cons, p1s)</span>
+</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a>        <span class="c1"># p2_cons = jnp.take(cons, p2s)</span>
+</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a>        <span class="c1"># winner_win_prob_log = 0.0</span>
+</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>        <span class="c1"># winner_win_prob_log += p1_win_probs * log_win_prob_diff(diff/jnp.exp(p1_cons)) + p2_win_probs * log_win_prob_diff(-diff/jnp.exp(p1_cons))</span>
+</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a>        <span class="c1"># winner_win_prob_log += p1_win_probs * log_win_prob_diff(diff/jnp.exp(p2_cons)) + p2_win_probs * log_win_prob_diff(-diff/jnp.exp(p2_cons))</span>
+</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a>        <span class="c1"># winner_win_prob_log /= 2</span>
+</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a>        <span class="c1"># return jnp.mean(winner_win_prob_log) - 0.005*jnp.mean(cons ** 2)</span>
+</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a>
+</span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a>    <span class="c1"># Optimize for these params:</span>
+</span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a>    <span class="n">params</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">asdict</span><span class="p">(</span><span class="n">Model</span><span class="p">(</span><span class="n">rating</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+</span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a>        <span class="p">[</span><span class="n">player_count</span><span class="p">,</span> <span class="n">season_count</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">)))</span>
+</span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a>    <span class="c1"># &#39;consistency&#39;: jnp.zeros([player_count, season_count]),</span>
+</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a>
+</span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a>    <span class="c1"># Momentum gradient descent with restarts</span>
+</span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a>    <span class="n">m_lr</span> <span class="o">=</span> <span class="mf">1.0</span>
+</span><span id="L-156"><a href="#L-156"><span class="linenos">156</span></a>    <span class="n">lr</span> <span class="o">=</span> <span class="mf">10000.</span>  <span class="c1"># initial learning rate</span>
+</span><span id="L-157"><a href="#L-157"><span class="linenos">157</span></a>    <span class="n">momentum</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+</span><span id="L-158"><a href="#L-158"><span class="linenos">158</span></a>    <span class="n">last_params</span> <span class="o">=</span> <span class="n">params</span>
+</span><span id="L-159"><a href="#L-159"><span class="linenos">159</span></a>    <span class="n">last_eval</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+</span><span id="L-160"><a href="#L-160"><span class="linenos">160</span></a>    <span class="n">last_grad</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+</span><span id="L-161"><a href="#L-161"><span class="linenos">161</span></a>    <span class="n">last_reset_step</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span id="L-162"><a href="#L-162"><span class="linenos">162</span></a>
+</span><span id="L-163"><a href="#L-163"><span class="linenos">163</span></a>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">max_steps</span><span class="p">):</span>
+</span><span id="L-164"><a href="#L-164"><span class="linenos">164</span></a>        <span class="p">(</span><span class="nb">eval</span><span class="p">,</span> <span class="n">model_fit</span><span class="p">),</span> <span class="n">grad</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">has_aux</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">params</span><span class="p">)</span>
+</span><span id="L-165"><a href="#L-165"><span class="linenos">165</span></a>
+</span><span id="L-166"><a href="#L-166"><span class="linenos">166</span></a>        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">do_log</span><span class="p">:</span>
+</span><span id="L-167"><a href="#L-167"><span class="linenos">167</span></a>            <span class="n">ratings</span> <span class="o">=</span> <span class="n">grad</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">]</span>
+</span><span id="L-168"><a href="#L-168"><span class="linenos">168</span></a>            <span class="n">q</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">]</span> <span class="o">==</span>
+</span><span id="L-169"><a href="#L-169"><span class="linenos">169</span></a>                        <span class="n">last_params</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+</span><span id="L-170"><a href="#L-170"><span class="linenos">170</span></a>            <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">100</span> <span class="ow">and</span> <span class="n">q</span> <span class="o">&gt;</span> <span class="mf">0.9</span><span class="p">:</span>
+</span><span id="L-171"><a href="#L-171"><span class="linenos">171</span></a>                <span class="k">break</span>
+</span><span id="L-172"><a href="#L-172"><span class="linenos">172</span></a>            <span class="nb">print</span><span class="p">(</span>
+</span><span id="L-173"><a href="#L-173"><span class="linenos">173</span></a>                <span class="sa">f</span><span class="s1">&#39;Step </span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s1">4</span><span class="si">}</span><span class="s1">: eval: </span><span class="si">{</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="nb">eval</span><span class="p">)</span><span class="si">}</span><span class="s1"> lr=</span><span class="si">{</span><span class="n">lr</span><span class="si">:</span><span class="s1">7</span><span class="si">}</span><span class="s1"> grad=</span><span class="si">{</span><span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ratings</span><span class="p">)</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</span><span id="L-174"><a href="#L-174"><span class="linenos">174</span></a>        <span class="k">if</span> <span class="kc">False</span><span class="p">:</span>
+</span><span id="L-175"><a href="#L-175"><span class="linenos">175</span></a>            <span class="c1"># Standard batch gradient descent algorithm works too. Just use good LR.</span>
+</span><span id="L-176"><a href="#L-176"><span class="linenos">176</span></a>            <span class="n">params</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">,</span> <span class="n">g</span><span class="p">:</span> <span class="n">p</span> <span class="o">+</span> <span class="n">lr</span> <span class="o">*</span> <span class="n">g</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">grad</span><span class="p">)</span>
+</span><span id="L-177"><a href="#L-177"><span class="linenos">177</span></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="L-178"><a href="#L-178"><span class="linenos">178</span></a>            <span class="k">if</span> <span class="nb">eval</span> <span class="o">&lt;</span> <span class="n">last_eval</span><span class="p">:</span>
+</span><span id="L-179"><a href="#L-179"><span class="linenos">179</span></a>                <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">do_log</span><span class="p">:</span>
+</span><span id="L-180"><a href="#L-180"><span class="linenos">180</span></a>                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;reset to </span><span class="si">{</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="n">last_eval</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</span><span id="L-181"><a href="#L-181"><span class="linenos">181</span></a>                <span class="n">lr</span> <span class="o">/=</span> <span class="mf">1.5</span>
+</span><span id="L-182"><a href="#L-182"><span class="linenos">182</span></a>                <span class="k">if</span> <span class="n">last_reset_step</span> <span class="o">==</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+</span><span id="L-183"><a href="#L-183"><span class="linenos">183</span></a>                    <span class="n">lr</span> <span class="o">/=</span> <span class="mi">4</span>
+</span><span id="L-184"><a href="#L-184"><span class="linenos">184</span></a>                <span class="n">last_reset_step</span> <span class="o">=</span> <span class="n">i</span>
+</span><span id="L-185"><a href="#L-185"><span class="linenos">185</span></a>                <span class="n">momentum</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+</span><span id="L-186"><a href="#L-186"><span class="linenos">186</span></a>                <span class="c1"># momentum /= 2.</span>
+</span><span id="L-187"><a href="#L-187"><span class="linenos">187</span></a>                <span class="n">params</span><span class="p">,</span> <span class="nb">eval</span><span class="p">,</span> <span class="n">grad</span> <span class="o">=</span> <span class="n">last_params</span><span class="p">,</span> <span class="n">last_eval</span><span class="p">,</span> <span class="n">last_grad</span>
+</span><span id="L-188"><a href="#L-188"><span class="linenos">188</span></a>            <span class="k">else</span><span class="p">:</span>
+</span><span id="L-189"><a href="#L-189"><span class="linenos">189</span></a>                <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="n">last_reset_step</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="L-190"><a href="#L-190"><span class="linenos">190</span></a>                    <span class="n">lr</span> <span class="o">*=</span> <span class="mf">1.5</span>
+</span><span id="L-191"><a href="#L-191"><span class="linenos">191</span></a>                <span class="n">last_params</span><span class="p">,</span> <span class="n">last_eval</span><span class="p">,</span> <span class="n">last_grad</span> <span class="o">=</span> <span class="n">params</span><span class="p">,</span> <span class="nb">eval</span><span class="p">,</span> <span class="n">grad</span>
+</span><span id="L-192"><a href="#L-192"><span class="linenos">192</span></a>            <span class="n">momentum</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">m</span><span class="p">,</span> <span class="n">g</span><span class="p">:</span> <span class="n">m_lr</span> <span class="o">*</span> <span class="n">m</span> <span class="o">+</span> <span class="n">g</span><span class="p">,</span> <span class="n">momentum</span><span class="p">,</span> <span class="n">grad</span><span class="p">)</span>
+</span><span id="L-193"><a href="#L-193"><span class="linenos">193</span></a>            <span class="n">params</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="n">p</span> <span class="o">+</span> <span class="n">lr</span> <span class="o">*</span> <span class="n">m</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
+</span><span id="L-194"><a href="#L-194"><span class="linenos">194</span></a>    <span class="k">return</span> <span class="n">Model</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">),</span> <span class="n">model_fit</span>
+</span><span id="L-195"><a href="#L-195"><span class="linenos">195</span></a>
+</span><span id="L-196"><a href="#L-196"><span class="linenos">196</span></a>
+</span><span id="L-197"><a href="#L-197"><span class="linenos">197</span></a><span class="c1">#   selector = np.array(data[&#39;win_types&#39;]) != &#39;not_played&#39;</span>
+</span><span id="L-198"><a href="#L-198"><span class="linenos">198</span></a><span class="c1">#   players = data[&#39;players&#39;]</span>
+</span><span id="L-199"><a href="#L-199"><span class="linenos">199</span></a><span class="c1">#   player_count = len(players)</span>
+</span><span id="L-200"><a href="#L-200"><span class="linenos">200</span></a><span class="c1">#   season_count = 22</span>
+</span><span id="L-201"><a href="#L-201"><span class="linenos">201</span></a><span class="c1">#</span>
+</span><span id="L-202"><a href="#L-202"><span class="linenos">202</span></a><span class="c1">#   first_season = [99999999] * player_count</span>
+</span><span id="L-203"><a href="#L-203"><span class="linenos">203</span></a><span class="c1">#   last_season = [-1] * player_count</span>
+</span><span id="L-204"><a href="#L-204"><span class="linenos">204</span></a><span class="c1">#</span>
+</span><span id="L-205"><a href="#L-205"><span class="linenos">205</span></a><span class="c1">#   for p1, p2, s in zip(data[&#39;p1s&#39;], data[&#39;p2s&#39;], data[&#39;timestamps&#39;]):</span>
+</span><span id="L-206"><a href="#L-206"><span class="linenos">206</span></a><span class="c1">#     first_season[p1] = min(first_season[p1], s)</span>
+</span><span id="L-207"><a href="#L-207"><span class="linenos">207</span></a><span class="c1">#     first_season[p2] = min(first_season[p2], s)</span>
+</span><span id="L-208"><a href="#L-208"><span class="linenos">208</span></a><span class="c1">#     last_season[p1] = max(last_season[p1], s)</span>
+</span><span id="L-209"><a href="#L-209"><span class="linenos">209</span></a><span class="c1">#     last_season[p2] = max(last_season[p2], s)</span>
+</span><span id="L-210"><a href="#L-210"><span class="linenos">210</span></a><span class="c1">#</span>
+</span><span id="L-211"><a href="#L-211"><span class="linenos">211</span></a><span class="c1">#   data = {</span>
+</span><span id="L-212"><a href="#L-212"><span class="linenos">212</span></a><span class="c1">#     &#39;p1s&#39;: jnp.array(data[&#39;p1s&#39;])[selector],</span>
+</span><span id="L-213"><a href="#L-213"><span class="linenos">213</span></a><span class="c1">#     &#39;p2s&#39;: jnp.array(data[&#39;p2s&#39;])[selector],</span>
+</span><span id="L-214"><a href="#L-214"><span class="linenos">214</span></a><span class="c1">#     &#39;p1_win_probs&#39;: jnp.array(data[&#39;p1_win_probs&#39;])[selector],</span>
+</span><span id="L-215"><a href="#L-215"><span class="linenos">215</span></a><span class="c1">#     &#39;timestamps&#39;: jnp.array(data[&#39;timestamps&#39;])[selector],</span>
+</span><span id="L-216"><a href="#L-216"><span class="linenos">216</span></a><span class="c1">#   }</span>
+</span><span id="L-217"><a href="#L-217"><span class="linenos">217</span></a><span class="c1">#   data[&#39;p1_win_probs&#39;] = (1-regularization) * data[&#39;p1_win_probs&#39;] + regularization * 0.5</span>
+</span><span id="L-218"><a href="#L-218"><span class="linenos">218</span></a><span class="c1">#</span>
+</span><span id="L-219"><a href="#L-219"><span class="linenos">219</span></a><span class="c1">#   params, model_fit = train(data, steps=steps, learning_rate=lr, do_log=do_log)</span>
+</span><span id="L-220"><a href="#L-220"><span class="linenos">220</span></a><span class="c1">#   elos = params[&#39;elos&#39;]</span>
+</span><span id="L-221"><a href="#L-221"><span class="linenos">221</span></a><span class="c1">#   assert elos.shape == (player_count, season_count), (elos.shape, (player_count, season_count))</span>
+</span><span id="L-222"><a href="#L-222"><span class="linenos">222</span></a><span class="c1">#</span>
+</span><span id="L-223"><a href="#L-223"><span class="linenos">223</span></a><span class="c1">#</span>
+</span><span id="L-224"><a href="#L-224"><span class="linenos">224</span></a><span class="c1">#   Sort by last season&#39;s elo</span>
+</span><span id="L-225"><a href="#L-225"><span class="linenos">225</span></a><span class="c1">#   order = jnp.flip(elos[:, -1].argsort())</span>
+</span><span id="L-226"><a href="#L-226"><span class="linenos">226</span></a><span class="c1">#</span>
+</span><span id="L-227"><a href="#L-227"><span class="linenos">227</span></a><span class="c1">#   players = np.array(players)[order]</span>
+</span><span id="L-228"><a href="#L-228"><span class="linenos">228</span></a><span class="c1">#   elos = elos[order]</span>
+</span><span id="L-229"><a href="#L-229"><span class="linenos">229</span></a><span class="c1">#   first_season = jnp.array(first_season)[order]</span>
+</span><span id="L-230"><a href="#L-230"><span class="linenos">230</span></a><span class="c1">#   last_season = jnp.array(last_season)[order]</span>
+</span><span id="L-231"><a href="#L-231"><span class="linenos">231</span></a><span class="c1">#</span>
+</span><span id="L-232"><a href="#L-232"><span class="linenos">232</span></a><span class="c1">#   print(f&#39;Model fit: {model_fit} improvement={model_fit-expected_fit}&#39;)</span>
+</span><span id="L-233"><a href="#L-233"><span class="linenos">233</span></a><span class="c1">#   result = {</span>
+</span><span id="L-234"><a href="#L-234"><span class="linenos">234</span></a><span class="c1">#     &#39;players&#39;: players.tolist(),</span>
+</span><span id="L-235"><a href="#L-235"><span class="linenos">235</span></a><span class="c1">#     # elos is a list of lists. For each player, we have ELO strength for a given season.</span>
+</span><span id="L-236"><a href="#L-236"><span class="linenos">236</span></a><span class="c1">#     &#39;elos&#39;: elos.tolist(),</span>
+</span><span id="L-237"><a href="#L-237"><span class="linenos">237</span></a><span class="c1">#     &#39;first_season&#39;: first_season.tolist(),</span>
+</span><span id="L-238"><a href="#L-238"><span class="linenos">238</span></a><span class="c1">#     &#39;last_season&#39;: last_season.tolist(),</span>
+</span><span id="L-239"><a href="#L-239"><span class="linenos">239</span></a><span class="c1">#   }</span>
 </span></pre></div>
 
 
@@ -301,13 +369,16 @@
     </div>
     <a class="headerlink" href="#win_prob"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="win_prob-17"><a href="#win_prob-17"><span class="linenos">17</span></a><span class="k">def</span> <span class="nf">win_prob</span><span class="p">(</span><span class="n">rating</span><span class="p">,</span> <span class="n">opp_rating</span><span class="p">):</span>
-</span><span id="win_prob-18"><a href="#win_prob-18"><span class="linenos">18</span></a>    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="n">opp_rating</span><span class="o">-</span><span class="n">rating</span><span class="p">))</span>
-</span><span id="win_prob-19"><a href="#win_prob-19"><span class="linenos">19</span></a>    <span class="c1"># This is more understandable and equivalent:</span>
-</span><span id="win_prob-20"><a href="#win_prob-20"><span class="linenos">20</span></a>    <span class="c1"># return jnp.exp2(rating) / (jnp.exp2(rating) + jnp.exp2(opp_rating))</span>
+</span><span id="win_prob-18"><a href="#win_prob-18"><span class="linenos">18</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Probability of win for given ratings.&quot;&quot;&quot;</span>
+</span><span id="win_prob-19"><a href="#win_prob-19"><span class="linenos">19</span></a>    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="n">opp_rating</span><span class="o">-</span><span class="n">rating</span><span class="p">))</span>
+</span><span id="win_prob-20"><a href="#win_prob-20"><span class="linenos">20</span></a>    <span class="c1"># This is more understandable and equivalent:</span>
+</span><span id="win_prob-21"><a href="#win_prob-21"><span class="linenos">21</span></a>    <span class="c1"># return jnp.exp2(rating) / (jnp.exp2(rating) + jnp.exp2(opp_rating))</span>
 </span></pre></div>
 
 
-    
+            <div class="docstring"><p>Probability of win for given ratings.</p>
+</div>
+
 
                 </section>
                 <section id="log_win_prob">
@@ -321,10 +392,10 @@
 
     </div>
     <a class="headerlink" href="#log_win_prob"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="log_win_prob-23"><a href="#log_win_prob-23"><span class="linenos">23</span></a><span class="k">def</span> <span class="nf">log_win_prob</span><span class="p">(</span><span class="n">rating</span><span class="p">,</span> <span class="n">opp_rating</span><span class="p">):</span>
-</span><span id="log_win_prob-24"><a href="#log_win_prob-24"><span class="linenos">24</span></a>    <span class="c1"># return jnp.log2(win_prob(rating, opp_rating))</span>
-</span><span id="log_win_prob-25"><a href="#log_win_prob-25"><span class="linenos">25</span></a>    <span class="n">diff</span> <span class="o">=</span> <span class="n">opp_rating</span> <span class="o">-</span> <span class="n">rating</span>
-</span><span id="log_win_prob-26"><a href="#log_win_prob-26"><span class="linenos">26</span></a>    <span class="k">return</span> <span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="n">diff</span><span class="p">))</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="log_win_prob-24"><a href="#log_win_prob-24"><span class="linenos">24</span></a><span class="k">def</span> <span class="nf">log_win_prob</span><span class="p">(</span><span class="n">rating</span><span class="p">,</span> <span class="n">opp_rating</span><span class="p">):</span>
+</span><span id="log_win_prob-25"><a href="#log_win_prob-25"><span class="linenos">25</span></a>    <span class="c1"># return jnp.log2(win_prob(rating, opp_rating))</span>
+</span><span id="log_win_prob-26"><a href="#log_win_prob-26"><span class="linenos">26</span></a>    <span class="n">diff</span> <span class="o">=</span> <span class="n">opp_rating</span> <span class="o">-</span> <span class="n">rating</span>
+</span><span id="log_win_prob-27"><a href="#log_win_prob-27"><span class="linenos">27</span></a>    <span class="k">return</span> <span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="n">diff</span><span class="p">))</span>
 </span></pre></div>
 
 
@@ -342,12 +413,12 @@
 
     </div>
     <a class="headerlink" href="#log_data_prob"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="log_data_prob-29"><a href="#log_data_prob-29"><span class="linenos">29</span></a><span class="k">def</span> <span class="nf">log_data_prob</span><span class="p">(</span><span class="n">p1_ratings</span><span class="p">,</span> <span class="n">p2_ratings</span><span class="p">,</span> <span class="n">p1_win_probs</span><span class="p">,</span> <span class="n">p2_win_probs</span><span class="p">):</span>
-</span><span id="log_data_prob-30"><a href="#log_data_prob-30"><span class="linenos">30</span></a>    <span class="n">winner_win_prob_log</span> <span class="o">=</span> <span class="n">p1_win_probs</span> <span class="o">*</span> \
-</span><span id="log_data_prob-31"><a href="#log_data_prob-31"><span class="linenos">31</span></a>        <span class="n">log_win_prob</span><span class="p">(</span><span class="n">p1_ratings</span><span class="p">,</span> <span class="n">p2_ratings</span><span class="p">)</span> <span class="o">+</span> <span class="n">p2_win_probs</span> <span class="o">*</span> \
-</span><span id="log_data_prob-32"><a href="#log_data_prob-32"><span class="linenos">32</span></a>        <span class="n">log_win_prob</span><span class="p">(</span><span class="n">p2_ratings</span><span class="p">,</span> <span class="n">p1_ratings</span><span class="p">)</span>
-</span><span id="log_data_prob-33"><a href="#log_data_prob-33"><span class="linenos">33</span></a>    <span class="n">mean_log_data_prob</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">winner_win_prob_log</span><span class="p">)</span>
-</span><span id="log_data_prob-34"><a href="#log_data_prob-34"><span class="linenos">34</span></a>    <span class="k">return</span> <span class="n">mean_log_data_prob</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="log_data_prob-30"><a href="#log_data_prob-30"><span class="linenos">30</span></a><span class="k">def</span> <span class="nf">log_data_prob</span><span class="p">(</span><span class="n">p1_ratings</span><span class="p">,</span> <span class="n">p2_ratings</span><span class="p">,</span> <span class="n">p1_win_probs</span><span class="p">,</span> <span class="n">p2_win_probs</span><span class="p">):</span>
+</span><span id="log_data_prob-31"><a href="#log_data_prob-31"><span class="linenos">31</span></a>    <span class="n">winner_win_prob_log</span> <span class="o">=</span> <span class="n">p1_win_probs</span> <span class="o">*</span> \
+</span><span id="log_data_prob-32"><a href="#log_data_prob-32"><span class="linenos">32</span></a>        <span class="n">log_win_prob</span><span class="p">(</span><span class="n">p1_ratings</span><span class="p">,</span> <span class="n">p2_ratings</span><span class="p">)</span> <span class="o">+</span> <span class="n">p2_win_probs</span> <span class="o">*</span> \
+</span><span id="log_data_prob-33"><a href="#log_data_prob-33"><span class="linenos">33</span></a>        <span class="n">log_win_prob</span><span class="p">(</span><span class="n">p2_ratings</span><span class="p">,</span> <span class="n">p1_ratings</span><span class="p">)</span>
+</span><span id="log_data_prob-34"><a href="#log_data_prob-34"><span class="linenos">34</span></a>    <span class="n">mean_log_data_prob</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">winner_win_prob_log</span><span class="p">)</span>
+</span><span id="log_data_prob-35"><a href="#log_data_prob-35"><span class="linenos">35</span></a>    <span class="k">return</span> <span class="n">mean_log_data_prob</span>
 </span></pre></div>
 
 
@@ -366,45 +437,93 @@
 
     </div>
     <a class="headerlink" href="#MatchResults"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="MatchResults-37"><a href="#MatchResults-37"><span class="linenos">37</span></a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-</span><span id="MatchResults-38"><a href="#MatchResults-38"><span class="linenos">38</span></a><span class="k">class</span> <span class="nc">MatchResults</span><span class="p">:</span>
-</span><span id="MatchResults-39"><a href="#MatchResults-39"><span class="linenos">39</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Match data for AccuRating.</span>
-</span><span id="MatchResults-40"><a href="#MatchResults-40"><span class="linenos">40</span></a><span class="sd">    All attributes have a shape (match_count,).</span>
-</span><span id="MatchResults-41"><a href="#MatchResults-41"><span class="linenos">41</span></a>
-</span><span id="MatchResults-42"><a href="#MatchResults-42"><span class="linenos">42</span></a><span class="sd">    Attributes:</span>
-</span><span id="MatchResults-43"><a href="#MatchResults-43"><span class="linenos">43</span></a><span class="sd">        p1: Player 1 id (small integer).</span>
-</span><span id="MatchResults-44"><a href="#MatchResults-44"><span class="linenos">44</span></a><span class="sd">        p2: Player 2 id (small integer).</span>
-</span><span id="MatchResults-45"><a href="#MatchResults-45"><span class="linenos">45</span></a><span class="sd">        p1_win_prob: 1.0 if p1 wins, 0.0 if p2 wins. Can be in [0.0, 1.0]</span>
-</span><span id="MatchResults-46"><a href="#MatchResults-46"><span class="linenos">46</span></a><span class="sd">        timestamp: Currently the timestamps have to be small integers.</span>
-</span><span id="MatchResults-47"><a href="#MatchResults-47"><span class="linenos">47</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="MatchResults-48"><a href="#MatchResults-48"><span class="linenos">48</span></a>    <span class="n">p1</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
-</span><span id="MatchResults-49"><a href="#MatchResults-49"><span class="linenos">49</span></a>    <span class="n">p2</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="MatchResults-38"><a href="#MatchResults-38"><span class="linenos">38</span></a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+</span><span id="MatchResults-39"><a href="#MatchResults-39"><span class="linenos">39</span></a><span class="k">class</span> <span class="nc">MatchResults</span><span class="p">:</span>
+</span><span id="MatchResults-40"><a href="#MatchResults-40"><span class="linenos">40</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Match data for AccuRating.</span>
+</span><span id="MatchResults-41"><a href="#MatchResults-41"><span class="linenos">41</span></a><span class="sd">    All attributes have a shape (match_count,).</span>
+</span><span id="MatchResults-42"><a href="#MatchResults-42"><span class="linenos">42</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="MatchResults-43"><a href="#MatchResults-43"><span class="linenos">43</span></a>
+</span><span id="MatchResults-44"><a href="#MatchResults-44"><span class="linenos">44</span></a>    <span class="n">p1</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+</span><span id="MatchResults-45"><a href="#MatchResults-45"><span class="linenos">45</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Player 1 id (small integer).&quot;&quot;&quot;</span>
+</span><span id="MatchResults-46"><a href="#MatchResults-46"><span class="linenos">46</span></a>
+</span><span id="MatchResults-47"><a href="#MatchResults-47"><span class="linenos">47</span></a>    <span class="n">p2</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+</span><span id="MatchResults-48"><a href="#MatchResults-48"><span class="linenos">48</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Player 2 id (small integer).&quot;&quot;&quot;</span>
+</span><span id="MatchResults-49"><a href="#MatchResults-49"><span class="linenos">49</span></a>
 </span><span id="MatchResults-50"><a href="#MatchResults-50"><span class="linenos">50</span></a>    <span class="n">p1_win_prob</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
-</span><span id="MatchResults-51"><a href="#MatchResults-51"><span class="linenos">51</span></a>    <span class="n">timestamp</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+</span><span id="MatchResults-51"><a href="#MatchResults-51"><span class="linenos">51</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;1.0 if p1 wins, 0.0 if p2 wins. Can be any number in [0.0, 1.0].&quot;&quot;&quot;</span>
+</span><span id="MatchResults-52"><a href="#MatchResults-52"><span class="linenos">52</span></a>
+</span><span id="MatchResults-53"><a href="#MatchResults-53"><span class="linenos">53</span></a>    <span class="n">season</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+</span><span id="MatchResults-54"><a href="#MatchResults-54"><span class="linenos">54</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Currently the seasons have to be small integers.&quot;&quot;&quot;</span>
 </span></pre></div>
 
 
             <div class="docstring"><p>Match data for AccuRating.
 All attributes have a shape (match_count,).</p>
-
-<p>Attributes:
-    p1: Player 1 id (small integer).
-    p2: Player 2 id (small integer).
-    p1_win_prob: 1.0 if p1 wins, 0.0 if p2 wins. Can be in [0.0, 1.0]
-    timestamp: Currently the timestamps have to be small integers.</p>
 </div>
 
 
                             <div id="MatchResults.__init__" class="classattr">
                                 <div class="attr function">
             
-        <span class="name">MatchResults</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">p1</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span>,</span><span class="param">	<span class="n">p2</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span>,</span><span class="param">	<span class="n">p1_win_prob</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span>,</span><span class="param">	<span class="n">timestamp</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span></span>)</span>
+        <span class="name">MatchResults</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">p1</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span>,</span><span class="param">	<span class="n">p2</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span>,</span><span class="param">	<span class="n">p1_win_prob</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span>,</span><span class="param">	<span class="n">season</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span></span>)</span>
 
         
     </div>
     <a class="headerlink" href="#MatchResults.__init__"></a>
     
     
+
+                            </div>
+                            <div id="MatchResults.p1" class="classattr">
+                                <div class="attr variable">
+            <span class="name">p1</span><span class="annotation">: numpy.ndarray</span>
+
+        
+    </div>
+    <a class="headerlink" href="#MatchResults.p1"></a>
+    
+            <div class="docstring"><p>Player 1 id (small integer).</p>
+</div>
+
+
+                            </div>
+                            <div id="MatchResults.p2" class="classattr">
+                                <div class="attr variable">
+            <span class="name">p2</span><span class="annotation">: numpy.ndarray</span>
+
+        
+    </div>
+    <a class="headerlink" href="#MatchResults.p2"></a>
+    
+            <div class="docstring"><p>Player 2 id (small integer).</p>
+</div>
+
+
+                            </div>
+                            <div id="MatchResults.p1_win_prob" class="classattr">
+                                <div class="attr variable">
+            <span class="name">p1_win_prob</span><span class="annotation">: numpy.ndarray</span>
+
+        
+    </div>
+    <a class="headerlink" href="#MatchResults.p1_win_prob"></a>
+    
+            <div class="docstring"><p>1.0 if p1 wins, 0.0 if p2 wins. Can be any number in [0.0, 1.0].</p>
+</div>
+
+
+                            </div>
+                            <div id="MatchResults.season" class="classattr">
+                                <div class="attr variable">
+            <span class="name">season</span><span class="annotation">: numpy.ndarray</span>
+
+        
+    </div>
+    <a class="headerlink" href="#MatchResults.season"></a>
+    
+            <div class="docstring"><p>Currently the seasons have to be small integers.</p>
+</div>
+
 
                             </div>
                 </section>
@@ -420,81 +539,123 @@ All attributes have a shape (match_count,).</p>
 
     </div>
     <a class="headerlink" href="#Config"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="Config-54"><a href="#Config-54"><span class="linenos">54</span></a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-</span><span id="Config-55"><a href="#Config-55"><span class="linenos">55</span></a><span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
-</span><span id="Config-56"><a href="#Config-56"><span class="linenos">56</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;AccuRating configuration.</span>
-</span><span id="Config-57"><a href="#Config-57"><span class="linenos">57</span></a>
-</span><span id="Config-58"><a href="#Config-58"><span class="linenos">58</span></a><span class="sd">    Attributes:</span>
-</span><span id="Config-59"><a href="#Config-59"><span class="linenos">59</span></a><span class="sd">        time_rating_stability:</span>
-</span><span id="Config-60"><a href="#Config-60"><span class="linenos">60</span></a><span class="sd">            Currently the timestamps have to be small integers.</span>
-</span><span id="Config-61"><a href="#Config-61"><span class="linenos">61</span></a><span class="sd">            time_rating_stability=0 means that ratings at each timestamp are completly separate.</span>
-</span><span id="Config-62"><a href="#Config-62"><span class="linenos">62</span></a><span class="sd">            time_rating_stability=inf means that ratings at each timestamp should be the same.</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="Config-57"><a href="#Config-57"><span class="linenos">57</span></a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+</span><span id="Config-58"><a href="#Config-58"><span class="linenos">58</span></a><span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+</span><span id="Config-59"><a href="#Config-59"><span class="linenos">59</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;AccuRating configuration.&quot;&quot;&quot;</span>
+</span><span id="Config-60"><a href="#Config-60"><span class="linenos">60</span></a>
+</span><span id="Config-61"><a href="#Config-61"><span class="linenos">61</span></a>    <span class="n">season_rating_stability</span><span class="p">:</span> <span class="nb">float</span>
+</span><span id="Config-62"><a href="#Config-62"><span class="linenos">62</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Rating stability across seasons.</span>
 </span><span id="Config-63"><a href="#Config-63"><span class="linenos">63</span></a>
-</span><span id="Config-64"><a href="#Config-64"><span class="linenos">64</span></a><span class="sd">        smoothing:</span>
-</span><span id="Config-65"><a href="#Config-65"><span class="linenos">65</span></a><span class="sd">            There are two sources of data:</span>
-</span><span id="Config-66"><a href="#Config-66"><span class="linenos">66</span></a><span class="sd">                Match result: Winner probably has a higher rating than the looser.</span>
-</span><span id="Config-67"><a href="#Config-67"><span class="linenos">67</span></a><span class="sd">                Match-making: Matched players probably have similar strength.</span>
-</span><span id="Config-68"><a href="#Config-68"><span class="linenos">68</span></a><span class="sd">            Setting somothing to 0.0 ignorse match-making as and relies on the match result only.</span>
-</span><span id="Config-69"><a href="#Config-69"><span class="linenos">69</span></a><span class="sd">            Setting smoothing to 1.0 ignorse match result and relies on match-making only.</span>
-</span><span id="Config-70"><a href="#Config-70"><span class="linenos">70</span></a>
-</span><span id="Config-71"><a href="#Config-71"><span class="linenos">71</span></a><span class="sd">            Typically, in the absence of data ratings assume a prior that the skill of a player some fixed value like 1000.</span>
-</span><span id="Config-72"><a href="#Config-72"><span class="linenos">72</span></a><span class="sd">            This allows the rating to not escape to infinity when only losses or only wins are available.</span>
-</span><span id="Config-73"><a href="#Config-73"><span class="linenos">73</span></a><span class="sd">            Smoothing essentially allows to specify that the looser (in every match) had a small chance of winning.</span>
-</span><span id="Config-74"><a href="#Config-74"><span class="linenos">74</span></a><span class="sd">            This is also known as &#39;label smoothing&#39;.</span>
+</span><span id="Config-64"><a href="#Config-64"><span class="linenos">64</span></a><span class="sd">    Currently the seasons have to be small integers.</span>
+</span><span id="Config-65"><a href="#Config-65"><span class="linenos">65</span></a><span class="sd">    season_rating_stability = 0 means that ratings at each season are completly separate.</span>
+</span><span id="Config-66"><a href="#Config-66"><span class="linenos">66</span></a><span class="sd">    season_rating_stability = inf means that ratings at each season should be the same.&quot;&quot;&quot;</span>
+</span><span id="Config-67"><a href="#Config-67"><span class="linenos">67</span></a>
+</span><span id="Config-68"><a href="#Config-68"><span class="linenos">68</span></a>    <span class="n">smoothing</span><span class="p">:</span> <span class="nb">float</span>
+</span><span id="Config-69"><a href="#Config-69"><span class="linenos">69</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Balance between match results and player pairings as the sources of data.</span>
+</span><span id="Config-70"><a href="#Config-70"><span class="linenos">70</span></a><span class="sd">    There are two sources of data:</span>
+</span><span id="Config-71"><a href="#Config-71"><span class="linenos">71</span></a><span class="sd">    - Match result: Winner probably has a higher rating than the looser.</span>
+</span><span id="Config-72"><a href="#Config-72"><span class="linenos">72</span></a><span class="sd">    - Player pairing: Matched players probably have similar strength.</span>
+</span><span id="Config-73"><a href="#Config-73"><span class="linenos">73</span></a><span class="sd">    Setting smoothing to 0.0 ignorse player pairing as and would rely on the match result only.</span>
+</span><span id="Config-74"><a href="#Config-74"><span class="linenos">74</span></a><span class="sd">    Setting smoothing to 1.0 ignorse match result would rely on player pairing only.</span>
 </span><span id="Config-75"><a href="#Config-75"><span class="linenos">75</span></a>
-</span><span id="Config-76"><a href="#Config-76"><span class="linenos">76</span></a><span class="sd">        max_steps:</span>
-</span><span id="Config-77"><a href="#Config-77"><span class="linenos">77</span></a><span class="sd">            Limits the number of passes over the dataset.</span>
-</span><span id="Config-78"><a href="#Config-78"><span class="linenos">78</span></a>
-</span><span id="Config-79"><a href="#Config-79"><span class="linenos">79</span></a><span class="sd">        do_log:</span>
-</span><span id="Config-80"><a href="#Config-80"><span class="linenos">80</span></a><span class="sd">            Enables additional logging</span>
-</span><span id="Config-81"><a href="#Config-81"><span class="linenos">81</span></a>
-</span><span id="Config-82"><a href="#Config-82"><span class="linenos">82</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="Config-83"><a href="#Config-83"><span class="linenos">83</span></a>    <span class="n">time_rating_stability</span><span class="p">:</span> <span class="nb">float</span>
-</span><span id="Config-84"><a href="#Config-84"><span class="linenos">84</span></a>    <span class="n">smoothing</span><span class="p">:</span> <span class="nb">float</span>
-</span><span id="Config-85"><a href="#Config-85"><span class="linenos">85</span></a>    <span class="n">max_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1_000_000</span>
-</span><span id="Config-86"><a href="#Config-86"><span class="linenos">86</span></a>    <span class="n">do_log</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span id="Config-76"><a href="#Config-76"><span class="linenos">76</span></a><span class="sd">    Typically, in the absence of data ratings assume a prior that the skill of a player some fixed value like 1000.</span>
+</span><span id="Config-77"><a href="#Config-77"><span class="linenos">77</span></a><span class="sd">    This allows the rating to not escape to infinity when only losses or only wins are available.</span>
+</span><span id="Config-78"><a href="#Config-78"><span class="linenos">78</span></a><span class="sd">    Smoothing essentially allows to specify that the looser (in every match) had a small chance of winning.</span>
+</span><span id="Config-79"><a href="#Config-79"><span class="linenos">79</span></a><span class="sd">    This is also known as &#39;label smoothing&#39;.&quot;&quot;&quot;</span>
+</span><span id="Config-80"><a href="#Config-80"><span class="linenos">80</span></a>
+</span><span id="Config-81"><a href="#Config-81"><span class="linenos">81</span></a>    <span class="n">max_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1_000_000</span>
+</span><span id="Config-82"><a href="#Config-82"><span class="linenos">82</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Limits the number of passes over the dataset.&quot;&quot;&quot;</span>
+</span><span id="Config-83"><a href="#Config-83"><span class="linenos">83</span></a>
+</span><span id="Config-84"><a href="#Config-84"><span class="linenos">84</span></a>    <span class="n">do_log</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span id="Config-85"><a href="#Config-85"><span class="linenos">85</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Enables additional logging.&quot;&quot;&quot;</span>
 </span></pre></div>
 
 
             <div class="docstring"><p>AccuRating configuration.</p>
-
-<p>Attributes:
-    time_rating_stability:
-        Currently the timestamps have to be small integers.
-        time_rating_stability=0 means that ratings at each timestamp are completly separate.
-        time_rating_stability=inf means that ratings at each timestamp should be the same.</p>
-
-<pre><code>smoothing:
-    There are two sources of data:
-        Match result: Winner probably has a higher rating than the looser.
-        Match-making: Matched players probably have similar strength.
-    Setting somothing to 0.0 ignorse match-making as and relies on the match result only.
-    Setting smoothing to 1.0 ignorse match result and relies on match-making only.
-
-    Typically, in the absence of data ratings assume a prior that the skill of a player some fixed value like 1000.
-    This allows the rating to not escape to infinity when only losses or only wins are available.
-    Smoothing essentially allows to specify that the looser (in every match) had a small chance of winning.
-    This is also known as 'label smoothing'.
-
-max_steps:
-    Limits the number of passes over the dataset.
-
-do_log:
-    Enables additional logging
-</code></pre>
 </div>
 
 
                             <div id="Config.__init__" class="classattr">
                                 <div class="attr function">
             
-        <span class="name">Config</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">time_rating_stability</span><span class="p">:</span> <span class="nb">float</span>,</span><span class="param">	<span class="n">smoothing</span><span class="p">:</span> <span class="nb">float</span>,</span><span class="param">	<span class="n">max_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000000</span>,</span><span class="param">	<span class="n">do_log</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></span>)</span>
+        <span class="name">Config</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">season_rating_stability</span><span class="p">:</span> <span class="nb">float</span>,</span><span class="param">	<span class="n">smoothing</span><span class="p">:</span> <span class="nb">float</span>,</span><span class="param">	<span class="n">max_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000000</span>,</span><span class="param">	<span class="n">do_log</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></span>)</span>
 
         
     </div>
     <a class="headerlink" href="#Config.__init__"></a>
     
     
+
+                            </div>
+                            <div id="Config.season_rating_stability" class="classattr">
+                                <div class="attr variable">
+            <span class="name">season_rating_stability</span><span class="annotation">: float</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Config.season_rating_stability"></a>
+    
+            <div class="docstring"><p>Rating stability across seasons.</p>
+
+<p>Currently the seasons have to be small integers.
+season_rating_stability = 0 means that ratings at each season are completly separate.
+season_rating_stability = inf means that ratings at each season should be the same.</p>
+</div>
+
+
+                            </div>
+                            <div id="Config.smoothing" class="classattr">
+                                <div class="attr variable">
+            <span class="name">smoothing</span><span class="annotation">: float</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Config.smoothing"></a>
+    
+            <div class="docstring"><p>Balance between match results and player pairings as the sources of data.
+There are two sources of data:</p>
+
+<ul>
+<li>Match result: Winner probably has a higher rating than the looser.</li>
+<li>Player pairing: Matched players probably have similar strength.
+Setting smoothing to 0.0 ignorse player pairing as and would rely on the match result only.
+Setting smoothing to 1.0 ignorse match result would rely on player pairing only.</li>
+</ul>
+
+<p>Typically, in the absence of data ratings assume a prior that the skill of a player some fixed value like 1000.
+This allows the rating to not escape to infinity when only losses or only wins are available.
+Smoothing essentially allows to specify that the looser (in every match) had a small chance of winning.
+This is also known as 'label smoothing'.</p>
+</div>
+
+
+                            </div>
+                            <div id="Config.max_steps" class="classattr">
+                                <div class="attr variable">
+            <span class="name">max_steps</span><span class="annotation">: int</span>        =
+<span class="default_value">1000000</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Config.max_steps"></a>
+    
+            <div class="docstring"><p>Limits the number of passes over the dataset.</p>
+</div>
+
+
+                            </div>
+                            <div id="Config.do_log" class="classattr">
+                                <div class="attr variable">
+            <span class="name">do_log</span><span class="annotation">: bool</span>        =
+<span class="default_value">False</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Config.do_log"></a>
+    
+            <div class="docstring"><p>Enables additional logging.</p>
+</div>
+
 
                             </div>
                 </section>
@@ -510,17 +671,17 @@ do_log:
 
     </div>
     <a class="headerlink" href="#Model"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="Model-89"><a href="#Model-89"><span class="linenos">89</span></a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-</span><span id="Model-90"><a href="#Model-90"><span class="linenos">90</span></a><span class="k">class</span> <span class="nc">Model</span><span class="p">:</span>
-</span><span id="Model-91"><a href="#Model-91"><span class="linenos">91</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Trained model.</span>
-</span><span id="Model-92"><a href="#Model-92"><span class="linenos">92</span></a>
-</span><span id="Model-93"><a href="#Model-93"><span class="linenos">93</span></a><span class="sd">    Attributes:</span>
-</span><span id="Model-94"><a href="#Model-94"><span class="linenos">94</span></a><span class="sd">        rating:</span>
-</span><span id="Model-95"><a href="#Model-95"><span class="linenos">95</span></a><span class="sd">            Currently the timestamps have to be small integers.</span>
-</span><span id="Model-96"><a href="#Model-96"><span class="linenos">96</span></a><span class="sd">            rating contains players&#39; rating at each timestam</span>
-</span><span id="Model-97"><a href="#Model-97"><span class="linenos">97</span></a><span class="sd">            rating has a shape (player_count, max(timestamp)-1).</span>
-</span><span id="Model-98"><a href="#Model-98"><span class="linenos">98</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="Model-99"><a href="#Model-99"><span class="linenos">99</span></a>    <span class="n">rating</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="Model-88"><a href="#Model-88"><span class="linenos">88</span></a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+</span><span id="Model-89"><a href="#Model-89"><span class="linenos">89</span></a><span class="k">class</span> <span class="nc">Model</span><span class="p">:</span>
+</span><span id="Model-90"><a href="#Model-90"><span class="linenos">90</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Trained model.</span>
+</span><span id="Model-91"><a href="#Model-91"><span class="linenos">91</span></a>
+</span><span id="Model-92"><a href="#Model-92"><span class="linenos">92</span></a><span class="sd">    Attributes:</span>
+</span><span id="Model-93"><a href="#Model-93"><span class="linenos">93</span></a><span class="sd">        rating:</span>
+</span><span id="Model-94"><a href="#Model-94"><span class="linenos">94</span></a><span class="sd">            Currently the seasons have to be small integers.</span>
+</span><span id="Model-95"><a href="#Model-95"><span class="linenos">95</span></a><span class="sd">            rating contains players&#39; rating at each timestam</span>
+</span><span id="Model-96"><a href="#Model-96"><span class="linenos">96</span></a><span class="sd">            rating has a shape (player_count, max(season)-1).</span>
+</span><span id="Model-97"><a href="#Model-97"><span class="linenos">97</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="Model-98"><a href="#Model-98"><span class="linenos">98</span></a>    <span class="n">rating</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
 </span></pre></div>
 
 
@@ -528,9 +689,9 @@ do_log:
 
 <p>Attributes:
     rating:
-        Currently the timestamps have to be small integers.
+        Currently the seasons have to be small integers.
         rating contains players' rating at each timestam
-        rating has a shape (player_count, max(timestamp)-1).</p>
+        rating has a shape (player_count, max(season)-1).</p>
 </div>
 
 
@@ -558,106 +719,106 @@ do_log:
 
     </div>
     <a class="headerlink" href="#fit"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="fit-102"><a href="#fit-102"><span class="linenos">102</span></a><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
-</span><span id="fit-103"><a href="#fit-103"><span class="linenos">103</span></a>    <span class="n">data</span><span class="p">:</span> <span class="n">MatchResults</span><span class="p">,</span>
-</span><span id="fit-104"><a href="#fit-104"><span class="linenos">104</span></a>    <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span>
-</span><span id="fit-105"><a href="#fit-105"><span class="linenos">105</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Model</span><span class="p">:</span>
-</span><span id="fit-106"><a href="#fit-106"><span class="linenos">106</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Fits the model to data according to config.</span>
-</span><span id="fit-107"><a href="#fit-107"><span class="linenos">107</span></a><span class="sd">    The time complexity is O(match_count * player_count * max(timestamp) * steps)</span>
-</span><span id="fit-108"><a href="#fit-108"><span class="linenos">108</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="fit-109"><a href="#fit-109"><span class="linenos">109</span></a>    <span class="n">p1_win_probs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">p1_win_prob</span>
-</span><span id="fit-110"><a href="#fit-110"><span class="linenos">110</span></a>    <span class="n">p1_win_probs</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">config</span><span class="o">.</span><span class="n">smoothing</span><span class="p">)</span> <span class="o">*</span> \
-</span><span id="fit-111"><a href="#fit-111"><span class="linenos">111</span></a>        <span class="n">p1_win_probs</span> <span class="o">+</span> <span class="n">config</span><span class="o">.</span><span class="n">smoothing</span> <span class="o">*</span> <span class="mf">0.5</span>
-</span><span id="fit-112"><a href="#fit-112"><span class="linenos">112</span></a>    <span class="n">p2_win_probs</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">p1_win_prob</span>
-</span><span id="fit-113"><a href="#fit-113"><span class="linenos">113</span></a>    <span class="n">p1s</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">p1</span>
-</span><span id="fit-114"><a href="#fit-114"><span class="linenos">114</span></a>    <span class="n">p2s</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">p2</span>
-</span><span id="fit-115"><a href="#fit-115"><span class="linenos">115</span></a>    <span class="n">seasons</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">timestamp</span>
-</span><span id="fit-116"><a href="#fit-116"><span class="linenos">116</span></a>
-</span><span id="fit-117"><a href="#fit-117"><span class="linenos">117</span></a>    <span class="n">player_count</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">p1s</span><span class="p">),</span> <span class="n">jnp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">p2s</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
-</span><span id="fit-118"><a href="#fit-118"><span class="linenos">118</span></a>    <span class="n">season_count</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">seasons</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-</span><span id="fit-119"><a href="#fit-119"><span class="linenos">119</span></a>
-</span><span id="fit-120"><a href="#fit-120"><span class="linenos">120</span></a>    <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span> <span class="o">=</span> <span class="n">p1s</span><span class="o">.</span><span class="n">shape</span>
-</span><span id="fit-121"><a href="#fit-121"><span class="linenos">121</span></a>    <span class="k">assert</span> <span class="n">seasons</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
-</span><span id="fit-122"><a href="#fit-122"><span class="linenos">122</span></a>    <span class="k">assert</span> <span class="n">p1s</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
-</span><span id="fit-123"><a href="#fit-123"><span class="linenos">123</span></a>    <span class="k">assert</span> <span class="n">p2s</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
-</span><span id="fit-124"><a href="#fit-124"><span class="linenos">124</span></a>    <span class="k">assert</span> <span class="n">p1_win_probs</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
-</span><span id="fit-125"><a href="#fit-125"><span class="linenos">125</span></a>
-</span><span id="fit-126"><a href="#fit-126"><span class="linenos">126</span></a>    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
-</span><span id="fit-127"><a href="#fit-127"><span class="linenos">127</span></a>        <span class="n">ratings</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">]</span>
-</span><span id="fit-128"><a href="#fit-128"><span class="linenos">128</span></a>        <span class="k">assert</span> <span class="n">ratings</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">player_count</span><span class="p">,</span> <span class="n">season_count</span><span class="p">)</span>
-</span><span id="fit-129"><a href="#fit-129"><span class="linenos">129</span></a>        <span class="n">p1_ratings</span> <span class="o">=</span> <span class="n">ratings</span><span class="p">[</span><span class="n">p1s</span><span class="p">,</span> <span class="n">seasons</span><span class="p">]</span>
-</span><span id="fit-130"><a href="#fit-130"><span class="linenos">130</span></a>        <span class="n">p2_ratings</span> <span class="o">=</span> <span class="n">ratings</span><span class="p">[</span><span class="n">p2s</span><span class="p">,</span> <span class="n">seasons</span><span class="p">]</span>
-</span><span id="fit-131"><a href="#fit-131"><span class="linenos">131</span></a>
-</span><span id="fit-132"><a href="#fit-132"><span class="linenos">132</span></a>        <span class="k">assert</span> <span class="n">p1_ratings</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
-</span><span id="fit-133"><a href="#fit-133"><span class="linenos">133</span></a>        <span class="k">assert</span> <span class="n">p2_ratings</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
-</span><span id="fit-134"><a href="#fit-134"><span class="linenos">134</span></a>        <span class="n">mean_log_data_prob</span> <span class="o">=</span> <span class="n">log_data_prob</span><span class="p">(</span>
-</span><span id="fit-135"><a href="#fit-135"><span class="linenos">135</span></a>            <span class="n">p1_ratings</span><span class="p">,</span> <span class="n">p2_ratings</span><span class="p">,</span> <span class="n">p1_win_probs</span><span class="p">,</span> <span class="n">p2_win_probs</span><span class="p">)</span>
-</span><span id="fit-136"><a href="#fit-136"><span class="linenos">136</span></a>        <span class="n">rating_season_divergence</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">time_rating_stability</span> <span class="o">*</span> \
-</span><span id="fit-137"><a href="#fit-137"><span class="linenos">137</span></a>            <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">ratings</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">ratings</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-</span><span id="fit-138"><a href="#fit-138"><span class="linenos">138</span></a>        <span class="n">geomean_data_prob</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="n">mean_log_data_prob</span><span class="p">)</span>
-</span><span id="fit-139"><a href="#fit-139"><span class="linenos">139</span></a>        <span class="k">return</span> <span class="n">mean_log_data_prob</span> <span class="o">-</span> <span class="n">rating_season_divergence</span><span class="p">,</span> <span class="n">geomean_data_prob</span>
-</span><span id="fit-140"><a href="#fit-140"><span class="linenos">140</span></a>
-</span><span id="fit-141"><a href="#fit-141"><span class="linenos">141</span></a>        <span class="c1"># TODO: This is an experiment trying to evaluate ELO playing consistency. Try again and delete if does not work.</span>
-</span><span id="fit-142"><a href="#fit-142"><span class="linenos">142</span></a>        <span class="c1"># cons = params[&#39;consistency&#39;]</span>
-</span><span id="fit-143"><a href="#fit-143"><span class="linenos">143</span></a>        <span class="c1"># p1_cons = jnp.take(cons, p1s)</span>
-</span><span id="fit-144"><a href="#fit-144"><span class="linenos">144</span></a>        <span class="c1"># p2_cons = jnp.take(cons, p2s)</span>
-</span><span id="fit-145"><a href="#fit-145"><span class="linenos">145</span></a>        <span class="c1"># winner_win_prob_log = 0.0</span>
-</span><span id="fit-146"><a href="#fit-146"><span class="linenos">146</span></a>        <span class="c1"># winner_win_prob_log += p1_win_probs * log_win_prob_diff(diff/jnp.exp(p1_cons)) + p2_win_probs * log_win_prob_diff(-diff/jnp.exp(p1_cons))</span>
-</span><span id="fit-147"><a href="#fit-147"><span class="linenos">147</span></a>        <span class="c1"># winner_win_prob_log += p1_win_probs * log_win_prob_diff(diff/jnp.exp(p2_cons)) + p2_win_probs * log_win_prob_diff(-diff/jnp.exp(p2_cons))</span>
-</span><span id="fit-148"><a href="#fit-148"><span class="linenos">148</span></a>        <span class="c1"># winner_win_prob_log /= 2</span>
-</span><span id="fit-149"><a href="#fit-149"><span class="linenos">149</span></a>        <span class="c1"># return jnp.mean(winner_win_prob_log) - 0.005*jnp.mean(cons ** 2)</span>
-</span><span id="fit-150"><a href="#fit-150"><span class="linenos">150</span></a>
-</span><span id="fit-151"><a href="#fit-151"><span class="linenos">151</span></a>    <span class="c1"># Optimize for these params:</span>
-</span><span id="fit-152"><a href="#fit-152"><span class="linenos">152</span></a>    <span class="n">params</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">asdict</span><span class="p">(</span><span class="n">Model</span><span class="p">(</span><span class="n">rating</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
-</span><span id="fit-153"><a href="#fit-153"><span class="linenos">153</span></a>        <span class="p">[</span><span class="n">player_count</span><span class="p">,</span> <span class="n">season_count</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">)))</span>
-</span><span id="fit-154"><a href="#fit-154"><span class="linenos">154</span></a>    <span class="c1"># &#39;consistency&#39;: jnp.zeros([player_count, season_count]),</span>
-</span><span id="fit-155"><a href="#fit-155"><span class="linenos">155</span></a>
-</span><span id="fit-156"><a href="#fit-156"><span class="linenos">156</span></a>    <span class="c1"># Momentum gradient descent with restarts</span>
-</span><span id="fit-157"><a href="#fit-157"><span class="linenos">157</span></a>    <span class="n">m_lr</span> <span class="o">=</span> <span class="mf">1.0</span>
-</span><span id="fit-158"><a href="#fit-158"><span class="linenos">158</span></a>    <span class="n">lr</span> <span class="o">=</span> <span class="mf">10000.</span>  <span class="c1"># initial learning rate</span>
-</span><span id="fit-159"><a href="#fit-159"><span class="linenos">159</span></a>    <span class="n">momentum</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
-</span><span id="fit-160"><a href="#fit-160"><span class="linenos">160</span></a>    <span class="n">last_params</span> <span class="o">=</span> <span class="n">params</span>
-</span><span id="fit-161"><a href="#fit-161"><span class="linenos">161</span></a>    <span class="n">last_eval</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-</span><span id="fit-162"><a href="#fit-162"><span class="linenos">162</span></a>    <span class="n">last_grad</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
-</span><span id="fit-163"><a href="#fit-163"><span class="linenos">163</span></a>    <span class="n">last_reset_step</span> <span class="o">=</span> <span class="mi">0</span>
-</span><span id="fit-164"><a href="#fit-164"><span class="linenos">164</span></a>
-</span><span id="fit-165"><a href="#fit-165"><span class="linenos">165</span></a>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">max_steps</span><span class="p">):</span>
-</span><span id="fit-166"><a href="#fit-166"><span class="linenos">166</span></a>        <span class="p">(</span><span class="nb">eval</span><span class="p">,</span> <span class="n">model_fit</span><span class="p">),</span> <span class="n">grad</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">has_aux</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">params</span><span class="p">)</span>
-</span><span id="fit-167"><a href="#fit-167"><span class="linenos">167</span></a>
-</span><span id="fit-168"><a href="#fit-168"><span class="linenos">168</span></a>        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">do_log</span><span class="p">:</span>
-</span><span id="fit-169"><a href="#fit-169"><span class="linenos">169</span></a>            <span class="n">ratings</span> <span class="o">=</span> <span class="n">grad</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">]</span>
-</span><span id="fit-170"><a href="#fit-170"><span class="linenos">170</span></a>            <span class="n">q</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">]</span> <span class="o">==</span>
-</span><span id="fit-171"><a href="#fit-171"><span class="linenos">171</span></a>                        <span class="n">last_params</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
-</span><span id="fit-172"><a href="#fit-172"><span class="linenos">172</span></a>            <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">100</span> <span class="ow">and</span> <span class="n">q</span> <span class="o">&gt;</span> <span class="mf">0.9</span><span class="p">:</span>
-</span><span id="fit-173"><a href="#fit-173"><span class="linenos">173</span></a>                <span class="k">break</span>
-</span><span id="fit-174"><a href="#fit-174"><span class="linenos">174</span></a>            <span class="nb">print</span><span class="p">(</span>
-</span><span id="fit-175"><a href="#fit-175"><span class="linenos">175</span></a>                <span class="sa">f</span><span class="s1">&#39;Step </span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s1">4</span><span class="si">}</span><span class="s1">: eval: </span><span class="si">{</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="nb">eval</span><span class="p">)</span><span class="si">}</span><span class="s1"> lr=</span><span class="si">{</span><span class="n">lr</span><span class="si">:</span><span class="s1">7</span><span class="si">}</span><span class="s1"> grad=</span><span class="si">{</span><span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ratings</span><span class="p">)</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-</span><span id="fit-176"><a href="#fit-176"><span class="linenos">176</span></a>        <span class="k">if</span> <span class="kc">False</span><span class="p">:</span>
-</span><span id="fit-177"><a href="#fit-177"><span class="linenos">177</span></a>            <span class="c1"># Standard batch gradient descent algorithm works too. Just use good LR.</span>
-</span><span id="fit-178"><a href="#fit-178"><span class="linenos">178</span></a>            <span class="n">params</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">,</span> <span class="n">g</span><span class="p">:</span> <span class="n">p</span> <span class="o">+</span> <span class="n">lr</span> <span class="o">*</span> <span class="n">g</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">grad</span><span class="p">)</span>
-</span><span id="fit-179"><a href="#fit-179"><span class="linenos">179</span></a>        <span class="k">else</span><span class="p">:</span>
-</span><span id="fit-180"><a href="#fit-180"><span class="linenos">180</span></a>            <span class="k">if</span> <span class="nb">eval</span> <span class="o">&lt;</span> <span class="n">last_eval</span><span class="p">:</span>
-</span><span id="fit-181"><a href="#fit-181"><span class="linenos">181</span></a>                <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">do_log</span><span class="p">:</span>
-</span><span id="fit-182"><a href="#fit-182"><span class="linenos">182</span></a>                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;reset to </span><span class="si">{</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="n">last_eval</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-</span><span id="fit-183"><a href="#fit-183"><span class="linenos">183</span></a>                <span class="n">lr</span> <span class="o">/=</span> <span class="mf">1.5</span>
-</span><span id="fit-184"><a href="#fit-184"><span class="linenos">184</span></a>                <span class="k">if</span> <span class="n">last_reset_step</span> <span class="o">==</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-</span><span id="fit-185"><a href="#fit-185"><span class="linenos">185</span></a>                    <span class="n">lr</span> <span class="o">/=</span> <span class="mi">4</span>
-</span><span id="fit-186"><a href="#fit-186"><span class="linenos">186</span></a>                <span class="n">last_reset_step</span> <span class="o">=</span> <span class="n">i</span>
-</span><span id="fit-187"><a href="#fit-187"><span class="linenos">187</span></a>                <span class="n">momentum</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
-</span><span id="fit-188"><a href="#fit-188"><span class="linenos">188</span></a>                <span class="c1"># momentum /= 2.</span>
-</span><span id="fit-189"><a href="#fit-189"><span class="linenos">189</span></a>                <span class="n">params</span><span class="p">,</span> <span class="nb">eval</span><span class="p">,</span> <span class="n">grad</span> <span class="o">=</span> <span class="n">last_params</span><span class="p">,</span> <span class="n">last_eval</span><span class="p">,</span> <span class="n">last_grad</span>
-</span><span id="fit-190"><a href="#fit-190"><span class="linenos">190</span></a>            <span class="k">else</span><span class="p">:</span>
-</span><span id="fit-191"><a href="#fit-191"><span class="linenos">191</span></a>                <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="n">last_reset_step</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-</span><span id="fit-192"><a href="#fit-192"><span class="linenos">192</span></a>                    <span class="n">lr</span> <span class="o">*=</span> <span class="mf">1.5</span>
-</span><span id="fit-193"><a href="#fit-193"><span class="linenos">193</span></a>                <span class="n">last_params</span><span class="p">,</span> <span class="n">last_eval</span><span class="p">,</span> <span class="n">last_grad</span> <span class="o">=</span> <span class="n">params</span><span class="p">,</span> <span class="nb">eval</span><span class="p">,</span> <span class="n">grad</span>
-</span><span id="fit-194"><a href="#fit-194"><span class="linenos">194</span></a>            <span class="n">momentum</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">m</span><span class="p">,</span> <span class="n">g</span><span class="p">:</span> <span class="n">m_lr</span> <span class="o">*</span> <span class="n">m</span> <span class="o">+</span> <span class="n">g</span><span class="p">,</span> <span class="n">momentum</span><span class="p">,</span> <span class="n">grad</span><span class="p">)</span>
-</span><span id="fit-195"><a href="#fit-195"><span class="linenos">195</span></a>            <span class="n">params</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="n">p</span> <span class="o">+</span> <span class="n">lr</span> <span class="o">*</span> <span class="n">m</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
-</span><span id="fit-196"><a href="#fit-196"><span class="linenos">196</span></a>    <span class="k">return</span> <span class="n">Model</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">),</span> <span class="n">model_fit</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="fit-101"><a href="#fit-101"><span class="linenos">101</span></a><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
+</span><span id="fit-102"><a href="#fit-102"><span class="linenos">102</span></a>    <span class="n">data</span><span class="p">:</span> <span class="n">MatchResults</span><span class="p">,</span>
+</span><span id="fit-103"><a href="#fit-103"><span class="linenos">103</span></a>    <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span>
+</span><span id="fit-104"><a href="#fit-104"><span class="linenos">104</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Model</span><span class="p">:</span>
+</span><span id="fit-105"><a href="#fit-105"><span class="linenos">105</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Fits the model to data according to config.</span>
+</span><span id="fit-106"><a href="#fit-106"><span class="linenos">106</span></a><span class="sd">    The time complexity is O(match_count * player_count * max(season) * steps)</span>
+</span><span id="fit-107"><a href="#fit-107"><span class="linenos">107</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="fit-108"><a href="#fit-108"><span class="linenos">108</span></a>    <span class="n">p1_win_probs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">p1_win_prob</span>
+</span><span id="fit-109"><a href="#fit-109"><span class="linenos">109</span></a>    <span class="n">p1_win_probs</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">config</span><span class="o">.</span><span class="n">smoothing</span><span class="p">)</span> <span class="o">*</span> \
+</span><span id="fit-110"><a href="#fit-110"><span class="linenos">110</span></a>        <span class="n">p1_win_probs</span> <span class="o">+</span> <span class="n">config</span><span class="o">.</span><span class="n">smoothing</span> <span class="o">*</span> <span class="mf">0.5</span>
+</span><span id="fit-111"><a href="#fit-111"><span class="linenos">111</span></a>    <span class="n">p2_win_probs</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">p1_win_prob</span>
+</span><span id="fit-112"><a href="#fit-112"><span class="linenos">112</span></a>    <span class="n">p1s</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">p1</span>
+</span><span id="fit-113"><a href="#fit-113"><span class="linenos">113</span></a>    <span class="n">p2s</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">p2</span>
+</span><span id="fit-114"><a href="#fit-114"><span class="linenos">114</span></a>    <span class="n">seasons</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">season</span>
+</span><span id="fit-115"><a href="#fit-115"><span class="linenos">115</span></a>
+</span><span id="fit-116"><a href="#fit-116"><span class="linenos">116</span></a>    <span class="n">player_count</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">p1s</span><span class="p">),</span> <span class="n">jnp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">p2s</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
+</span><span id="fit-117"><a href="#fit-117"><span class="linenos">117</span></a>    <span class="n">season_count</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">seasons</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+</span><span id="fit-118"><a href="#fit-118"><span class="linenos">118</span></a>
+</span><span id="fit-119"><a href="#fit-119"><span class="linenos">119</span></a>    <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span> <span class="o">=</span> <span class="n">p1s</span><span class="o">.</span><span class="n">shape</span>
+</span><span id="fit-120"><a href="#fit-120"><span class="linenos">120</span></a>    <span class="k">assert</span> <span class="n">seasons</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
+</span><span id="fit-121"><a href="#fit-121"><span class="linenos">121</span></a>    <span class="k">assert</span> <span class="n">p1s</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
+</span><span id="fit-122"><a href="#fit-122"><span class="linenos">122</span></a>    <span class="k">assert</span> <span class="n">p2s</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
+</span><span id="fit-123"><a href="#fit-123"><span class="linenos">123</span></a>    <span class="k">assert</span> <span class="n">p1_win_probs</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
+</span><span id="fit-124"><a href="#fit-124"><span class="linenos">124</span></a>
+</span><span id="fit-125"><a href="#fit-125"><span class="linenos">125</span></a>    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+</span><span id="fit-126"><a href="#fit-126"><span class="linenos">126</span></a>        <span class="n">ratings</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">]</span>
+</span><span id="fit-127"><a href="#fit-127"><span class="linenos">127</span></a>        <span class="k">assert</span> <span class="n">ratings</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">player_count</span><span class="p">,</span> <span class="n">season_count</span><span class="p">)</span>
+</span><span id="fit-128"><a href="#fit-128"><span class="linenos">128</span></a>        <span class="n">p1_ratings</span> <span class="o">=</span> <span class="n">ratings</span><span class="p">[</span><span class="n">p1s</span><span class="p">,</span> <span class="n">seasons</span><span class="p">]</span>
+</span><span id="fit-129"><a href="#fit-129"><span class="linenos">129</span></a>        <span class="n">p2_ratings</span> <span class="o">=</span> <span class="n">ratings</span><span class="p">[</span><span class="n">p2s</span><span class="p">,</span> <span class="n">seasons</span><span class="p">]</span>
+</span><span id="fit-130"><a href="#fit-130"><span class="linenos">130</span></a>
+</span><span id="fit-131"><a href="#fit-131"><span class="linenos">131</span></a>        <span class="k">assert</span> <span class="n">p1_ratings</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
+</span><span id="fit-132"><a href="#fit-132"><span class="linenos">132</span></a>        <span class="k">assert</span> <span class="n">p2_ratings</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data_size</span><span class="p">,)</span>
+</span><span id="fit-133"><a href="#fit-133"><span class="linenos">133</span></a>        <span class="n">mean_log_data_prob</span> <span class="o">=</span> <span class="n">log_data_prob</span><span class="p">(</span>
+</span><span id="fit-134"><a href="#fit-134"><span class="linenos">134</span></a>            <span class="n">p1_ratings</span><span class="p">,</span> <span class="n">p2_ratings</span><span class="p">,</span> <span class="n">p1_win_probs</span><span class="p">,</span> <span class="n">p2_win_probs</span><span class="p">)</span>
+</span><span id="fit-135"><a href="#fit-135"><span class="linenos">135</span></a>        <span class="n">rating_season_divergence</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">season_rating_stability</span> <span class="o">*</span> \
+</span><span id="fit-136"><a href="#fit-136"><span class="linenos">136</span></a>            <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">ratings</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">ratings</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+</span><span id="fit-137"><a href="#fit-137"><span class="linenos">137</span></a>        <span class="n">geomean_data_prob</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="n">mean_log_data_prob</span><span class="p">)</span>
+</span><span id="fit-138"><a href="#fit-138"><span class="linenos">138</span></a>        <span class="k">return</span> <span class="n">mean_log_data_prob</span> <span class="o">-</span> <span class="n">rating_season_divergence</span><span class="p">,</span> <span class="n">geomean_data_prob</span>
+</span><span id="fit-139"><a href="#fit-139"><span class="linenos">139</span></a>
+</span><span id="fit-140"><a href="#fit-140"><span class="linenos">140</span></a>        <span class="c1"># TODO: This is an experiment trying to evaluate ELO playing consistency. Try again and delete if does not work.</span>
+</span><span id="fit-141"><a href="#fit-141"><span class="linenos">141</span></a>        <span class="c1"># cons = params[&#39;consistency&#39;]</span>
+</span><span id="fit-142"><a href="#fit-142"><span class="linenos">142</span></a>        <span class="c1"># p1_cons = jnp.take(cons, p1s)</span>
+</span><span id="fit-143"><a href="#fit-143"><span class="linenos">143</span></a>        <span class="c1"># p2_cons = jnp.take(cons, p2s)</span>
+</span><span id="fit-144"><a href="#fit-144"><span class="linenos">144</span></a>        <span class="c1"># winner_win_prob_log = 0.0</span>
+</span><span id="fit-145"><a href="#fit-145"><span class="linenos">145</span></a>        <span class="c1"># winner_win_prob_log += p1_win_probs * log_win_prob_diff(diff/jnp.exp(p1_cons)) + p2_win_probs * log_win_prob_diff(-diff/jnp.exp(p1_cons))</span>
+</span><span id="fit-146"><a href="#fit-146"><span class="linenos">146</span></a>        <span class="c1"># winner_win_prob_log += p1_win_probs * log_win_prob_diff(diff/jnp.exp(p2_cons)) + p2_win_probs * log_win_prob_diff(-diff/jnp.exp(p2_cons))</span>
+</span><span id="fit-147"><a href="#fit-147"><span class="linenos">147</span></a>        <span class="c1"># winner_win_prob_log /= 2</span>
+</span><span id="fit-148"><a href="#fit-148"><span class="linenos">148</span></a>        <span class="c1"># return jnp.mean(winner_win_prob_log) - 0.005*jnp.mean(cons ** 2)</span>
+</span><span id="fit-149"><a href="#fit-149"><span class="linenos">149</span></a>
+</span><span id="fit-150"><a href="#fit-150"><span class="linenos">150</span></a>    <span class="c1"># Optimize for these params:</span>
+</span><span id="fit-151"><a href="#fit-151"><span class="linenos">151</span></a>    <span class="n">params</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">asdict</span><span class="p">(</span><span class="n">Model</span><span class="p">(</span><span class="n">rating</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+</span><span id="fit-152"><a href="#fit-152"><span class="linenos">152</span></a>        <span class="p">[</span><span class="n">player_count</span><span class="p">,</span> <span class="n">season_count</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">)))</span>
+</span><span id="fit-153"><a href="#fit-153"><span class="linenos">153</span></a>    <span class="c1"># &#39;consistency&#39;: jnp.zeros([player_count, season_count]),</span>
+</span><span id="fit-154"><a href="#fit-154"><span class="linenos">154</span></a>
+</span><span id="fit-155"><a href="#fit-155"><span class="linenos">155</span></a>    <span class="c1"># Momentum gradient descent with restarts</span>
+</span><span id="fit-156"><a href="#fit-156"><span class="linenos">156</span></a>    <span class="n">m_lr</span> <span class="o">=</span> <span class="mf">1.0</span>
+</span><span id="fit-157"><a href="#fit-157"><span class="linenos">157</span></a>    <span class="n">lr</span> <span class="o">=</span> <span class="mf">10000.</span>  <span class="c1"># initial learning rate</span>
+</span><span id="fit-158"><a href="#fit-158"><span class="linenos">158</span></a>    <span class="n">momentum</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+</span><span id="fit-159"><a href="#fit-159"><span class="linenos">159</span></a>    <span class="n">last_params</span> <span class="o">=</span> <span class="n">params</span>
+</span><span id="fit-160"><a href="#fit-160"><span class="linenos">160</span></a>    <span class="n">last_eval</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+</span><span id="fit-161"><a href="#fit-161"><span class="linenos">161</span></a>    <span class="n">last_grad</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+</span><span id="fit-162"><a href="#fit-162"><span class="linenos">162</span></a>    <span class="n">last_reset_step</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span id="fit-163"><a href="#fit-163"><span class="linenos">163</span></a>
+</span><span id="fit-164"><a href="#fit-164"><span class="linenos">164</span></a>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">max_steps</span><span class="p">):</span>
+</span><span id="fit-165"><a href="#fit-165"><span class="linenos">165</span></a>        <span class="p">(</span><span class="nb">eval</span><span class="p">,</span> <span class="n">model_fit</span><span class="p">),</span> <span class="n">grad</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">has_aux</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">params</span><span class="p">)</span>
+</span><span id="fit-166"><a href="#fit-166"><span class="linenos">166</span></a>
+</span><span id="fit-167"><a href="#fit-167"><span class="linenos">167</span></a>        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">do_log</span><span class="p">:</span>
+</span><span id="fit-168"><a href="#fit-168"><span class="linenos">168</span></a>            <span class="n">ratings</span> <span class="o">=</span> <span class="n">grad</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">]</span>
+</span><span id="fit-169"><a href="#fit-169"><span class="linenos">169</span></a>            <span class="n">q</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">]</span> <span class="o">==</span>
+</span><span id="fit-170"><a href="#fit-170"><span class="linenos">170</span></a>                        <span class="n">last_params</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+</span><span id="fit-171"><a href="#fit-171"><span class="linenos">171</span></a>            <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">100</span> <span class="ow">and</span> <span class="n">q</span> <span class="o">&gt;</span> <span class="mf">0.9</span><span class="p">:</span>
+</span><span id="fit-172"><a href="#fit-172"><span class="linenos">172</span></a>                <span class="k">break</span>
+</span><span id="fit-173"><a href="#fit-173"><span class="linenos">173</span></a>            <span class="nb">print</span><span class="p">(</span>
+</span><span id="fit-174"><a href="#fit-174"><span class="linenos">174</span></a>                <span class="sa">f</span><span class="s1">&#39;Step </span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s1">4</span><span class="si">}</span><span class="s1">: eval: </span><span class="si">{</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="nb">eval</span><span class="p">)</span><span class="si">}</span><span class="s1"> lr=</span><span class="si">{</span><span class="n">lr</span><span class="si">:</span><span class="s1">7</span><span class="si">}</span><span class="s1"> grad=</span><span class="si">{</span><span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ratings</span><span class="p">)</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</span><span id="fit-175"><a href="#fit-175"><span class="linenos">175</span></a>        <span class="k">if</span> <span class="kc">False</span><span class="p">:</span>
+</span><span id="fit-176"><a href="#fit-176"><span class="linenos">176</span></a>            <span class="c1"># Standard batch gradient descent algorithm works too. Just use good LR.</span>
+</span><span id="fit-177"><a href="#fit-177"><span class="linenos">177</span></a>            <span class="n">params</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">,</span> <span class="n">g</span><span class="p">:</span> <span class="n">p</span> <span class="o">+</span> <span class="n">lr</span> <span class="o">*</span> <span class="n">g</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">grad</span><span class="p">)</span>
+</span><span id="fit-178"><a href="#fit-178"><span class="linenos">178</span></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="fit-179"><a href="#fit-179"><span class="linenos">179</span></a>            <span class="k">if</span> <span class="nb">eval</span> <span class="o">&lt;</span> <span class="n">last_eval</span><span class="p">:</span>
+</span><span id="fit-180"><a href="#fit-180"><span class="linenos">180</span></a>                <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">do_log</span><span class="p">:</span>
+</span><span id="fit-181"><a href="#fit-181"><span class="linenos">181</span></a>                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;reset to </span><span class="si">{</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="n">last_eval</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</span><span id="fit-182"><a href="#fit-182"><span class="linenos">182</span></a>                <span class="n">lr</span> <span class="o">/=</span> <span class="mf">1.5</span>
+</span><span id="fit-183"><a href="#fit-183"><span class="linenos">183</span></a>                <span class="k">if</span> <span class="n">last_reset_step</span> <span class="o">==</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+</span><span id="fit-184"><a href="#fit-184"><span class="linenos">184</span></a>                    <span class="n">lr</span> <span class="o">/=</span> <span class="mi">4</span>
+</span><span id="fit-185"><a href="#fit-185"><span class="linenos">185</span></a>                <span class="n">last_reset_step</span> <span class="o">=</span> <span class="n">i</span>
+</span><span id="fit-186"><a href="#fit-186"><span class="linenos">186</span></a>                <span class="n">momentum</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+</span><span id="fit-187"><a href="#fit-187"><span class="linenos">187</span></a>                <span class="c1"># momentum /= 2.</span>
+</span><span id="fit-188"><a href="#fit-188"><span class="linenos">188</span></a>                <span class="n">params</span><span class="p">,</span> <span class="nb">eval</span><span class="p">,</span> <span class="n">grad</span> <span class="o">=</span> <span class="n">last_params</span><span class="p">,</span> <span class="n">last_eval</span><span class="p">,</span> <span class="n">last_grad</span>
+</span><span id="fit-189"><a href="#fit-189"><span class="linenos">189</span></a>            <span class="k">else</span><span class="p">:</span>
+</span><span id="fit-190"><a href="#fit-190"><span class="linenos">190</span></a>                <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="n">last_reset_step</span><span class="p">)</span> <span class="o">%</span> <span class="mi">12</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="fit-191"><a href="#fit-191"><span class="linenos">191</span></a>                    <span class="n">lr</span> <span class="o">*=</span> <span class="mf">1.5</span>
+</span><span id="fit-192"><a href="#fit-192"><span class="linenos">192</span></a>                <span class="n">last_params</span><span class="p">,</span> <span class="n">last_eval</span><span class="p">,</span> <span class="n">last_grad</span> <span class="o">=</span> <span class="n">params</span><span class="p">,</span> <span class="nb">eval</span><span class="p">,</span> <span class="n">grad</span>
+</span><span id="fit-193"><a href="#fit-193"><span class="linenos">193</span></a>            <span class="n">momentum</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">m</span><span class="p">,</span> <span class="n">g</span><span class="p">:</span> <span class="n">m_lr</span> <span class="o">*</span> <span class="n">m</span> <span class="o">+</span> <span class="n">g</span><span class="p">,</span> <span class="n">momentum</span><span class="p">,</span> <span class="n">grad</span><span class="p">)</span>
+</span><span id="fit-194"><a href="#fit-194"><span class="linenos">194</span></a>            <span class="n">params</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="n">p</span> <span class="o">+</span> <span class="n">lr</span> <span class="o">*</span> <span class="n">m</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
+</span><span id="fit-195"><a href="#fit-195"><span class="linenos">195</span></a>    <span class="k">return</span> <span class="n">Model</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">),</span> <span class="n">model_fit</span>
 </span></pre></div>
 
 
             <div class="docstring"><p>Fits the model to data according to config.
-The time complexity is O(match_count * player_count * max(timestamp) * steps)</p>
+The time complexity is O(match_count * player_count * max(season) * steps)</p>
 </div>
 
 

@@ -14,6 +14,7 @@ config.update("jax_enable_x64", True)  # better model accuracy
 
 
 def win_prob(rating, opp_rating):
+    """Probability of win for given ratings."""
     return 1.0 / (1.0 + jnp.exp2(opp_rating-rating))
     # This is more understandable and equivalent:
     # return jnp.exp2(rating) / (jnp.exp2(rating) + jnp.exp2(opp_rating))
@@ -37,52 +38,50 @@ def log_data_prob(p1_ratings, p2_ratings, p1_win_probs, p2_win_probs):
 class MatchResults:
     """Match data for AccuRating.
     All attributes have a shape (match_count,).
-
-    Attributes:
-        p1: Player 1 id (small integer).
-        p2: Player 2 id (small integer).
-        p1_win_prob: 1.0 if p1 wins, 0.0 if p2 wins. Can be in [0.0, 1.0]
-        timestamp: Currently the timestamps have to be small integers.
     """
+
     p1: np.ndarray
+    """Player 1 id (small integer)."""
+
     p2: np.ndarray
+    """Player 2 id (small integer)."""
+
     p1_win_prob: np.ndarray
-    timestamp: np.ndarray
+    """1.0 if p1 wins, 0.0 if p2 wins. Can be any number in [0.0, 1.0]."""
+
+    season: np.ndarray
+    """Currently the seasons have to be small integers."""
 
 
 @dataclasses.dataclass
 class Config:
-    """AccuRating configuration.
+    """AccuRating configuration."""
 
-    Attributes:
-        time_rating_stability:
-            Currently the timestamps have to be small integers.
-            time_rating_stability=0 means that ratings at each timestamp are completly separate.
-            time_rating_stability=inf means that ratings at each timestamp should be the same.
+    season_rating_stability: float
+    """Rating stability across seasons.
 
-        smoothing:
-            There are two sources of data:
-                Match result: Winner probably has a higher rating than the looser.
-                Match-making: Matched players probably have similar strength.
-            Setting somothing to 0.0 ignorse match-making as and relies on the match result only.
-            Setting smoothing to 1.0 ignorse match result and relies on match-making only.
+    Currently the seasons have to be small integers.
+    season_rating_stability = 0 means that ratings at each season are completly separate.
+    season_rating_stability = inf means that ratings at each season should be the same."""
 
-            Typically, in the absence of data ratings assume a prior that the skill of a player some fixed value like 1000.
-            This allows the rating to not escape to infinity when only losses or only wins are available.
-            Smoothing essentially allows to specify that the looser (in every match) had a small chance of winning.
-            This is also known as 'label smoothing'.
-
-        max_steps:
-            Limits the number of passes over the dataset.
-
-        do_log:
-            Enables additional logging
-
-    """
-    time_rating_stability: float
     smoothing: float
+    """ Balance between match results and player pairings as the sources of data.
+    There are two sources of data:
+    - Match result: Winner probably has a higher rating than the looser.
+    - Player pairing: Matched players probably have similar strength.
+    Setting smoothing to 0.0 ignorse player pairing as and would rely on the match result only.
+    Setting smoothing to 1.0 ignorse match result would rely on player pairing only.
+
+    Typically, in the absence of data ratings assume a prior that the skill of a player some fixed value like 1000.
+    This allows the rating to not escape to infinity when only losses or only wins are available.
+    Smoothing essentially allows to specify that the looser (in every match) had a small chance of winning.
+    This is also known as 'label smoothing'."""
+
     max_steps: int = 1_000_000
+    """Limits the number of passes over the dataset."""
+
     do_log: bool = False
+    """Enables additional logging."""
 
 
 @dataclasses.dataclass
@@ -91,9 +90,9 @@ class Model:
 
     Attributes:
         rating:
-            Currently the timestamps have to be small integers.
+            Currently the seasons have to be small integers.
             rating contains players' rating at each timestam
-            rating has a shape (player_count, max(timestamp)-1).
+            rating has a shape (player_count, max(season)-1).
     """
     rating: np.ndarray
 
@@ -103,7 +102,7 @@ def fit(
     config: Config,
 ) -> Model:
     """Fits the model to data according to config.
-    The time complexity is O(match_count * player_count * max(timestamp) * steps)
+    The time complexity is O(match_count * player_count * max(season) * steps)
     """
     p1_win_probs = data.p1_win_prob
     p1_win_probs = (1 - config.smoothing) * \
@@ -111,7 +110,7 @@ def fit(
     p2_win_probs = 1.0 - data.p1_win_prob
     p1s = data.p1
     p2s = data.p2
-    seasons = data.timestamp
+    seasons = data.season
 
     player_count = jnp.maximum(jnp.max(p1s), jnp.max(p2s)) + 1
     season_count = jnp.max(seasons) + 1
@@ -132,7 +131,7 @@ def fit(
         assert p2_ratings.shape == (data_size,)
         mean_log_data_prob = log_data_prob(
             p1_ratings, p2_ratings, p1_win_probs, p2_win_probs)
-        rating_season_divergence = config.time_rating_stability * \
+        rating_season_divergence = config.season_rating_stability * \
             jnp.mean((ratings[:, 1:] - ratings[:, :-1])**2)
         geomean_data_prob = jnp.exp2(mean_log_data_prob)
         return mean_log_data_prob - rating_season_divergence, geomean_data_prob
@@ -193,3 +192,48 @@ def fit(
             momentum = tree_map(lambda m, g: m_lr * m + g, momentum, grad)
             params = tree_map(lambda p, m: p + lr * m, params, momentum)
     return Model(**params), model_fit
+
+
+#   selector = np.array(data['win_types']) != 'not_played'
+#   players = data['players']
+#   player_count = len(players)
+#   season_count = 22
+#
+#   first_season = [99999999] * player_count
+#   last_season = [-1] * player_count
+#
+#   for p1, p2, s in zip(data['p1s'], data['p2s'], data['timestamps']):
+#     first_season[p1] = min(first_season[p1], s)
+#     first_season[p2] = min(first_season[p2], s)
+#     last_season[p1] = max(last_season[p1], s)
+#     last_season[p2] = max(last_season[p2], s)
+#
+#   data = {
+#     'p1s': jnp.array(data['p1s'])[selector],
+#     'p2s': jnp.array(data['p2s'])[selector],
+#     'p1_win_probs': jnp.array(data['p1_win_probs'])[selector],
+#     'timestamps': jnp.array(data['timestamps'])[selector],
+#   }
+#   data['p1_win_probs'] = (1-regularization) * data['p1_win_probs'] + regularization * 0.5
+#
+#   params, model_fit = train(data, steps=steps, learning_rate=lr, do_log=do_log)
+#   elos = params['elos']
+#   assert elos.shape == (player_count, season_count), (elos.shape, (player_count, season_count))
+#
+#
+#   Sort by last season's elo
+#   order = jnp.flip(elos[:, -1].argsort())
+#
+#   players = np.array(players)[order]
+#   elos = elos[order]
+#   first_season = jnp.array(first_season)[order]
+#   last_season = jnp.array(last_season)[order]
+#
+#   print(f'Model fit: {model_fit} improvement={model_fit-expected_fit}')
+#   result = {
+#     'players': players.tolist(),
+#     # elos is a list of lists. For each player, we have ELO strength for a given season.
+#     'elos': elos.tolist(),
+#     'first_season': first_season.tolist(),
+#     'last_season': last_season.tolist(),
+#   }
