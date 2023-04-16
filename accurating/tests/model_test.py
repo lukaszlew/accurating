@@ -90,8 +90,8 @@ def test_fit(do_log=False):
     p1_win_prob=jnp.array(p1_win_probs),
     season=jnp.array(seasons),
   )
-  config = accurating.Config(elo_season_stability=0.0)
-  model, _ = accurating.fit(test_data, config, do_log=do_log)
+  config = accurating.Config(elo_season_stability=0.0, max_steps=70, do_log=do_log)
+  model, _ = accurating.fit(test_data, config)
   elos = model.rating
   elos = elos - jnp.min(elos, axis=0, keepdims=True)
   err = jnp.linalg.norm(elos - jnp.array(true_elos))

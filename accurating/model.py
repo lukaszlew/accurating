@@ -44,6 +44,8 @@ class MatchResults:
 @dataclasses.dataclass
 class Config:
   elo_season_stability: float
+  max_steps: int = 1_000_000
+  do_log: bool = False
 
 
 @dataclasses.dataclass
@@ -55,8 +57,6 @@ class Model:
 def fit(
   data: MatchResults,
   config: Config,
-  max_steps=None,
-  do_log=False,
 ) -> Model:
   p1_win_probs = data.p1_win_prob
   p2_win_probs = 1.0 - data.p1_win_prob
@@ -74,7 +74,7 @@ def fit(
   assert p1_win_probs.shape == (data_size,)
 
   def model(params):
-    elos = params['elos']
+    elos = params['rating']
     assert elos.shape == (player_count, season_count)
     p1_elos = elos[p1s, seasons]
     p2_elos = elos[p2s, seasons]
@@ -97,7 +97,7 @@ def fit(
     # return jnp.mean(winner_win_prob_log) - 0.005*jnp.mean(cons ** 2)
 
   # Optimize for these params:
-  params = Model(rating=jnp.zeros([player_count, season_count], dtype=jnp.float64))
+  params = dataclasses.asdict(Model(rating=jnp.zeros([player_count, season_count], dtype=jnp.float64)))
   # 'consistency': jnp.zeros([player_count, season_count]),
 
   # Momentum gradient descent with restarts
@@ -109,12 +109,12 @@ def fit(
   last_grad = tree_map(jnp.zeros_like, params)
   last_reset_step = 0
 
-  for i in range(max_steps or 9999999):
+  for i in range(config.max_steps):
     (eval, model_fit), grad = jax.value_and_grad(model,has_aux=True)(params)
 
-    if do_log:
-      elos = grad['elos']
-      q=jnp.sum(params['elos'] == last_params['elos']) / params['elos'].size
+    if config.do_log:
+      elos = grad['rating']
+      q=jnp.sum(params['rating'] == last_params['rating']) / params['rating'].size
       if i > 100 and q > 0.9:
         break
       print(f'Step {i:4}: eval: {jnp.exp2(eval)} lr={lr:7} grad={jnp.linalg.norm(elos)} {q}')
@@ -123,7 +123,7 @@ def fit(
       params = tree_map(lambda p, g: p + lr * g, params, grad)
     else:
       if eval < last_eval:
-        if do_log: print(f'reset to {jnp.exp2(last_eval)}')
+        if config.do_log: print(f'reset to {jnp.exp2(last_eval)}')
         lr /= 1.5
         if last_reset_step == i-1:
           lr /= 4
@@ -137,4 +137,4 @@ def fit(
         last_params, last_eval, last_grad = params, eval, grad
       momentum = tree_map(lambda m, g: m_lr * m + g, momentum, grad)
       params = tree_map(lambda p, m: p + lr * m, params, momentum)
-  return params, model_fit
+  return Model(**params), model_fit
