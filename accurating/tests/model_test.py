@@ -15,7 +15,7 @@ import jax.numpy as jnp
 #   first_season = [99999999] * player_count
 #   last_season = [-1] * player_count
 
-#   for p1, p2, s in zip(data['p1s'], data['p2s'], data['seasons']):
+#   for p1, p2, s in zip(data['p1s'], data['p2s'], data['timestamps']):
 #     first_season[p1] = min(first_season[p1], s)
 #     first_season[p2] = min(first_season[p2], s)
 #     last_season[p1] = max(last_season[p1], s)
@@ -25,7 +25,7 @@ import jax.numpy as jnp
 #     'p1s': jnp.array(data['p1s'])[selector],
 #     'p2s': jnp.array(data['p2s'])[selector],
 #     'p1_win_probs': jnp.array(data['p1_win_probs'])[selector],
-#     'seasons': jnp.array(data['seasons'])[selector],
+#     'timestamps': jnp.array(data['timestamps'])[selector],
 #   }
 #   data['p1_win_probs'] = (1-regularization) * data['p1_win_probs'] + regularization * 0.5
 
@@ -69,30 +69,32 @@ import jax.numpy as jnp
 
 
 def test_fit(do_log=True):
-  true_elos = jnp.array([[8.0, 4.0], [2.0, 3.0], [0.0, 0.0],])
-  p1s = []
-  p2s = []
-  p1_win_probs = []
-  seasons = []
-  player_count, season_count = true_elos.shape
-  for p1 in range(player_count):
-    for p2 in range(player_count):
-      for season in range(season_count):
-        p1s.append(p1)
-        p2s.append(p2)
-        p1_win_prob = accurating.win_prob(true_elos[p1][season], true_elos[p2][season])
-        p1_win_probs.append(p1_win_prob)
-        seasons.append(season)
+    true_elos = jnp.array([[8.0, 4.0], [2.0, 3.0], [0.0, 0.0],])
+    p1s = []
+    p2s = []
+    p1_win_probs = []
+    timestamps = []
+    player_count, season_count = true_elos.shape
+    for p1 in range(player_count):
+        for p2 in range(player_count):
+            for timestamp in range(season_count):
+                p1s.append(p1)
+                p2s.append(p2)
+                p1_win_prob = accurating.win_prob(
+                    true_elos[p1][timestamp], true_elos[p2][timestamp])
+                p1_win_probs.append(p1_win_prob)
+                timestamps.append(timestamp)
 
-  test_data = accurating.MatchResults(
-    p1=jnp.array(p1s),
-    p2=jnp.array(p2s),
-    p1_win_prob=jnp.array(p1_win_probs),
-    season=jnp.array(seasons),
-  )
-  config = accurating.Config(elo_season_stability=0.0, max_steps=100, do_log=do_log)
-  model, _ = accurating.fit(test_data, config)
-  elos = model.rating
-  elos = elos - jnp.min(elos, axis=0, keepdims=True)
-  err = jnp.linalg.norm(elos - jnp.array(true_elos))
-  assert err < 0.0001, f'FAIL err={err}; results={model}'
+    test_data = accurating.MatchResults(
+        p1=jnp.array(p1s),
+        p2=jnp.array(p2s),
+        p1_win_prob=jnp.array(p1_win_probs),
+        timestamp=jnp.array(timestamps),
+    )
+    config = accurating.Config(
+        time_rating_stability=0.0, smoothing=0.0, max_steps=100, do_log=do_log,)
+    model, _ = accurating.fit(test_data, config)
+    elos = model.rating
+    elos = elos - jnp.min(elos, axis=0, keepdims=True)
+    err = jnp.linalg.norm(elos - jnp.array(true_elos))
+    assert err < 0.0001, f'FAIL err={err}; results={model}'
