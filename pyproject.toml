@@ -11,6 +11,9 @@ jax = "^0.4.8"
 pytest = "^6.2.5"
 jaxlib = "^0.4.7"
 
+[tool.poetry.group.dev.dependencies]
+pdoc = "^13.1.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
