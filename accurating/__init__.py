@@ -1,1 +1,7 @@
-from .model import hello
+from .model import (
+  MatchResults,
+  Config,
+  Model,
+  fit,
+  win_prob,
+)

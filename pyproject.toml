@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "accurating"
-version = "0.1.0"
+version = "0.2"
 description = ""
 authors = ["Lukasz Lew <lukasz.lew@gmail.com>"]
 readme = "README.md"
@@ -8,7 +8,8 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 jax = "^0.4.8"
-pytest = "^7.3.1"
+pytest = "^6.2.5"
+jaxlib = "^0.4.7"
 
 [build-system]
 requires = ["poetry-core"]
