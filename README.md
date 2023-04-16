@@ -120,6 +120,7 @@ This repo implements:
 - Chess units
 - EGD conversion
 - Fit player variance (high variance player can more easily win against stonger players and more easily lose against weaker players)
+- Follow this: https://www.marwandebbiche.com/posts/python-package-tooling/
 
 ## Development
 
