@@ -1,9 +1,11 @@
 [tool.poetry]
-name = "accurating"
-version = "0.4.0"
-description = ""
+name = "AccuRating"
+version = "0.4.1"
+description = "AccuRating is a library for accurate player ranking based on match results."
 authors = ["Lukasz Lew <lukasz.lew@gmail.com>"]
 readme = "README.md"
+homepage = "https://github.com/lukaszlew/accurating"
+documentation = "https://lukaszlew.github.io/accurating/"
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -22,6 +24,3 @@ build-backend = "poetry.core.masonry.api"
 addopts = [
     "--import-mode=importlib",
 ]
-
-[project.urls]
-"Homepage" = "https://github.com/lukaszlew/accurating"

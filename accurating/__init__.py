@@ -6,3 +6,13 @@ from .model import (
     win_prob,
     data_from_dicts,
 )
+
+
+__all__ = [
+    "fit",
+    "data_from_dicts",
+    "MatchResultArrays",
+    "win_prob",
+    "Config",
+    "Model",
+]
