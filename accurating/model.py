@@ -35,8 +35,8 @@ def log_data_prob(p1_ratings, p2_ratings, p1_win_probs, p2_win_probs):
 
 
 @dataclasses.dataclass
-class MatchResults:
-    """Match data for AccuRating.
+class MatchResultArrays:
+    """Match data for AccuRating in numpy arrays.
     All attributes have a shape (match_count,).
     """
 
@@ -51,6 +51,9 @@ class MatchResults:
 
     season: np.ndarray
     """Currently the seasons have to be small integers."""
+
+    player_name: list[str] | None
+    """Indexed with player id. Not used in the training."""
 
 
 @dataclasses.dataclass
@@ -86,19 +89,19 @@ class Config:
 
 @dataclasses.dataclass
 class Model:
-    """Trained model.
+    """Trained model."""
 
-    Attributes:
-        rating:
-            Currently the seasons have to be small integers.
-            rating contains players' rating at each timestam
-            rating has a shape (player_count, max(season)-1).
-    """
     rating: np.ndarray
+    """Currently the seasons have to be small integers.
+    rating contains players' rating at each timestam
+    rating has a shape (player_count, max(season)-1)."""
+
+    player_name: list[str] | None
+    """Indexed with player id (length player_count). Not used in the training."""
 
 
 def fit(
-    data: MatchResults,
+    data: MatchResultArrays,
     config: Config,
 ) -> Model:
     """Fits the model to data according to config.
@@ -147,8 +150,9 @@ def fit(
         # return jnp.mean(winner_win_prob_log) - 0.005*jnp.mean(cons ** 2)
 
     # Optimize for these params:
-    params = dataclasses.asdict(Model(rating=jnp.zeros(
-        [player_count, season_count], dtype=jnp.float64)))
+    rating = jnp.zeros([player_count, season_count], dtype=jnp.float64)
+    params = dataclasses.asdict(
+        Model(rating=rating, player_name=data.player_name))
     # 'consistency': jnp.zeros([player_count, season_count]),
 
     # Momentum gradient descent with restarts
@@ -191,49 +195,36 @@ def fit(
                 last_params, last_eval, last_grad = params, eval, grad
             momentum = tree_map(lambda m, g: m_lr * m + g, momentum, grad)
             params = tree_map(lambda p, m: p + lr * m, params, momentum)
-    return Model(**params), model_fit
+    return Model(**params)
 
 
-#   selector = np.array(data['win_types']) != 'not_played'
-#   players = data['players']
-#   player_count = len(players)
-#   season_count = 22
-#
-#   first_season = [99999999] * player_count
-#   last_season = [-1] * player_count
-#
-#   for p1, p2, s in zip(data['p1s'], data['p2s'], data['timestamps']):
-#     first_season[p1] = min(first_season[p1], s)
-#     first_season[p2] = min(first_season[p2], s)
-#     last_season[p1] = max(last_season[p1], s)
-#     last_season[p2] = max(last_season[p2], s)
-#
-#   data = {
-#     'p1s': jnp.array(data['p1s'])[selector],
-#     'p2s': jnp.array(data['p2s'])[selector],
-#     'p1_win_probs': jnp.array(data['p1_win_probs'])[selector],
-#     'timestamps': jnp.array(data['timestamps'])[selector],
-#   }
-#   data['p1_win_probs'] = (1-regularization) * data['p1_win_probs'] + regularization * 0.5
-#
-#   params, model_fit = train(data, steps=steps, learning_rate=lr, do_log=do_log)
-#   elos = params['elos']
-#   assert elos.shape == (player_count, season_count), (elos.shape, (player_count, season_count))
-#
-#
-#   Sort by last season's elo
-#   order = jnp.flip(elos[:, -1].argsort())
-#
-#   players = np.array(players)[order]
-#   elos = elos[order]
-#   first_season = jnp.array(first_season)[order]
-#   last_season = jnp.array(last_season)[order]
-#
-#   print(f'Model fit: {model_fit} improvement={model_fit-expected_fit}')
-#   result = {
-#     'players': players.tolist(),
-#     # elos is a list of lists. For each player, we have ELO strength for a given season.
-#     'elos': elos.tolist(),
-#     'first_season': first_season.tolist(),
-#     'last_season': last_season.tolist(),
-#   }
+def data_from_dicts(matches) -> MatchResultArrays:
+    player_set = set()
+
+    for match in matches:
+        player_set.add(match['p1'])
+        player_set.add(match['p2'])
+        assert match['winner'] == match['p1'] or match['winner'] == match['p2']
+        assert isinstance(match['season'], int)
+
+    player_name = sorted(list(player_set))
+
+    p1 = []
+    p2 = []
+    p1_win_prob = []
+    season = []
+
+    for match in matches:
+        p1.append(player_name.index(match['p1']))
+        p2.append(player_name.index(match['p2']))
+        p1_win = match['winner'] == match['p1']
+        p1_win_prob.append(1.0 if p1_win else 0.0)
+        season.append(match['season'])
+
+    return MatchResultArrays(
+        p1=np.array(p1),
+        p2=np.array(p2),
+        p1_win_prob=np.array(p1_win_prob),
+        season=np.array(season),
+        player_name=player_name,
+    )

@@ -1,7 +1,8 @@
 from .model import (
-  MatchResults,
-  Config,
-  Model,
-  fit,
-  win_prob,
+    MatchResultArrays,
+    Config,
+    Model,
+    fit,
+    win_prob,
+    data_from_dicts,
 )
