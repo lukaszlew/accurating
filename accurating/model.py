@@ -154,8 +154,7 @@ def fit(
 
     # Optimize for these params:
     rating = jnp.zeros([player_count, season_count], dtype=jnp.float64)
-    params = dataclasses.asdict(
-        Model(rating=rating, player_name=None))
+    params = dataclasses.asdict(Model(rating=rating, player_name=None))
     # 'consistency': jnp.zeros([player_count, season_count]),
 
     # Momentum gradient descent with restarts
@@ -177,7 +176,7 @@ def fit(
             if i > 100 and q > 0.9:
                 break
             print(
-                f'Step {i:4}: eval: {jnp.exp2(eval)} lr={lr:7} grad={jnp.linalg.norm(ratings)} {q}')
+                f'Step {i:4}: eval: {jnp.exp2(eval):0.12f} lr={lr:4.4f} grad={jnp.linalg.norm(ratings):2.4f} q={q:0.3f}')
         if False:
             # Standard batch gradient descent algorithm works too. Just use good LR.
             params = tree_map(lambda p, g: p + lr * g, params, grad)

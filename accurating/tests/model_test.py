@@ -37,14 +37,14 @@ def test_fit():
     config = accurating.Config(
         season_rating_stability=0.0,
         smoothing=0.0,
-        max_steps=100,
+        max_steps=300,
         do_log=True,
     )
     model = accurating.fit(test_data, config)
     elos = model.rating
     elos = elos - jnp.min(elos, axis=0, keepdims=True)
     err = jnp.linalg.norm(elos - jnp.array(true_elos))
-    assert err < 0.0001, f'FAIL err={err}; results={model}'
+    assert err < 0.000001, f'FAIL err={err}; results={model}'
 
 
 def test_data_from_dicts():
