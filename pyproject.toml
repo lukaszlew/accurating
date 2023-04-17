@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "AccuRating"
-version = "0.4.1"
+version = "0.4.3"
 description = "AccuRating is a library for accurate player ranking based on match results."
 authors = ["Lukasz Lew <lukasz.lew@gmail.com>"]
 readme = "README.md"
@@ -10,11 +10,11 @@ documentation = "https://lukaszlew.github.io/accurating/"
 [tool.poetry.dependencies]
 python = "^3.10"
 jax = "^0.4.8"
-pytest = "^6.2.5"
 jaxlib = "^0.4.7"
 
 [tool.poetry.group.dev.dependencies]
 pdoc = "^13.1.0"
+pytest = "^6.2.5"
 
 [build-system]
 requires = ["poetry-core"]
