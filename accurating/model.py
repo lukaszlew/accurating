@@ -86,6 +86,9 @@ class Config:
     do_log: bool = False
     """Enables additional logging."""
 
+    initial_lr: float = 10000.0
+    """It is automatically adjusted, but sometimes it is too large and blows up."""
+
 
 @dataclasses.dataclass
 class Model:
@@ -152,12 +155,12 @@ def fit(
     # Optimize for these params:
     rating = jnp.zeros([player_count, season_count], dtype=jnp.float64)
     params = dataclasses.asdict(
-        Model(rating=rating, player_name=data.player_name))
+        Model(rating=rating, player_name=None))
     # 'consistency': jnp.zeros([player_count, season_count]),
 
     # Momentum gradient descent with restarts
     m_lr = 1.0
-    lr = 10000.  # initial learning rate
+    lr = config.initial_lr
     momentum = tree_map(jnp.zeros_like, params)
     last_params = params
     last_eval = -1
@@ -195,7 +198,7 @@ def fit(
                 last_params, last_eval, last_grad = params, eval, grad
             momentum = tree_map(lambda m, g: m_lr * m + g, momentum, grad)
             params = tree_map(lambda p, m: p + lr * m, params, momentum)
-    return Model(**params)
+    return Model(rating=params['rating'], player_name=data.player_name)
 
 
 def data_from_dicts(matches) -> MatchResultArrays:

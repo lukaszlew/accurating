@@ -59,6 +59,12 @@ def test_data_from_dicts():
       {
         "p1": "Caesar",
         "p2": "Alusia",
+        "winner": "Caesar",
+        "season": 1
+      },
+      {
+        "p1": "Leon",
+        "p2": "Alusia",
         "winner": "Alusia",
         "season": 1
       }
@@ -68,13 +74,18 @@ def test_data_from_dicts():
     data = accurating.data_from_dicts(matches)
 
     player_name = ['Alusia', 'Caesar', 'Leon']
-    p1 = np.array([2, 1])
-    p2 = np.array([1, 0])
-    p1_win_prob = np.array([1., 0.])
-    season = np.array([0, 1])
+    p1 = np.array([2, 1, 2])
+    p2 = np.array([1, 0, 0])
+    p1_win_prob = np.array([1., 1., 0])
+    season = np.array([0, 1, 1])
 
     assert data.player_name == player_name
     assert_array_equal(data.p1, p1)
     assert_array_equal(data.p2, p2)
     assert_array_equal(data.p1_win_prob, p1_win_prob)
     assert_array_equal(data.season, season)
+
+    cfg = accurating.Config(season_rating_stability=0.5,
+                            smoothing=0.1, max_steps=5, do_log=True, initial_lr=1.0,)
+    model = accurating.fit(data, cfg)
+    del model
