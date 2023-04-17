@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "accurating"
-version = "0.3.1"
+version = "0.4.0"
 description = ""
 authors = ["Lukasz Lew <lukasz.lew@gmail.com>"]
 readme = "README.md"
