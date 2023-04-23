@@ -2,9 +2,9 @@
 
 Library computing accurate ratings based on match results.
 
-## Usage
-
-Take a look at the unit test.
+- [Documentation](https://lukaszlew.github.io/accurating/accurating.html)
+- [Package](https://pypi.org/project/accurating/)
+- [Usage example](https://github.com/lukaszlew/accurating/blob/main/accurating/tests/model_test.py#L50)
 
 ## Is AccuRating accurate?
 

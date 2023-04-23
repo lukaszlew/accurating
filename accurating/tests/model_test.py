@@ -85,7 +85,12 @@ def test_data_from_dicts():
     assert_array_equal(data.p1_win_prob, p1_win_prob)
     assert_array_equal(data.season, season)
 
-    cfg = accurating.Config(season_rating_stability=0.5,
-                            smoothing=0.1, max_steps=5, do_log=True, initial_lr=1.0,)
+    cfg = accurating.Config(
+        season_rating_stability=0.5,
+        smoothing=0.1,
+        max_steps=5,
+        do_log=True,
+        initial_lr=1.0,
+    )
     model = accurating.fit(data, cfg)
     del model
