@@ -214,7 +214,7 @@ def data_from_dicts(matches) -> MatchResultArrays:
     for match in matches:
         player_set.add(match['p1'])
         player_set.add(match['p2'])
-        assert match['winner'] == match['p1'] or match['winner'] == match['p2']
+        assert match['winner'] == match['p1'] or match['winner'] == match['p2'], match
         assert isinstance(match['season'], int)
 
     player_name = sorted(list(player_set))

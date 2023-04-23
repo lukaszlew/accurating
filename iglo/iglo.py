@@ -63,14 +63,15 @@ def get_data(test):
 
 
 def get_data_new():
-    url = 'http://127.0.0.1:8000/api/'
-    data = request('ielo-data', url)
-    return data
+    url = 'http://127.0.0.1:8000/api/ar-matches'
+    print(f'Requesting JSON from url: {url}')
+    return requests.get(url).json()
 
 
 def save_iglo_data(path, test=False):
     with open(path, 'w') as f:
-        json.dump(get_data(test), f)
+        # json.dump(get_data(test), f)
+        json.dump(get_data_new(), f)
 
 
 def train_ielo(data_path, cfg_path, output_path):
@@ -116,5 +117,6 @@ def main(argv):
 
 if __name__ == '__main__':
     sys.path.insert(0, "..")
+    sys.path.insert(0, ".")
     import accurating
     main(sys.argv)
