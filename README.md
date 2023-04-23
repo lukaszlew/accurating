@@ -128,4 +128,7 @@ This repo implements:
 git clone https://github.com/lukaszlew/accurating
 poetry install
 poetry run pytest
+# edit stuff; increase version
+poetry build
+poetry publish
 ```
