@@ -94,13 +94,8 @@ class Config:
 class Model:
     """Trained model."""
 
-    rating: np.ndarray
-    """Currently the seasons have to be small integers.
-    rating contains players' rating at each timestam
-    rating has a shape (player_count, max(season)-1)."""
-
-    player_name: list[str] | None
-    """Indexed with player id (length player_count). Not used in the training."""
+    rating: dict[tuple[str, int], float]
+    """Player rating, indexed by name and season"""
 
 
 def fit(
@@ -154,12 +149,12 @@ def fit(
 
     # Optimize for these params:
     rating = jnp.zeros([player_count, season_count], dtype=jnp.float64)
-    params = dataclasses.asdict(Model(rating=rating, player_name=None))
+    params = dataclasses.asdict(Model(rating=rating))
     # 'consistency': jnp.zeros([player_count, season_count]),
 
     # Momentum gradient descent with restarts
     m_lr = 1.0
-    lr = config.initial_lr
+    lr = float(config.initial_lr)
     momentum = tree_map(jnp.zeros_like, params)
     last_params = params
     last_eval = -2  # eval of initial data is -1
@@ -169,14 +164,6 @@ def fit(
     for i in range(config.max_steps):
         (eval, model_fit), grad = jax.value_and_grad(model, has_aux=True)(params)
 
-        ratings = grad['rating']
-        q = jnp.sum(params['rating'] == last_params['rating']
-                    ) / params['rating'].size
-        if config.do_log:
-            print(
-                f'Step {i:4}: eval: {jnp.exp2(eval):0.12f} lr={lr:4.4f} grad={jnp.linalg.norm(ratings):2.4f} q={q:0.3f}')
-        if i > 1 and q > 0.99:
-            break
         if False:
             # Standard batch gradient descent algorithm works too. Just use good LR.
             params = tree_map(lambda p, g: p + lr * g, params, grad)
@@ -192,12 +179,33 @@ def fit(
                 # momentum /= 2.
                 params, eval, grad = last_params, last_eval, last_grad
             else:
-                if (i - last_reset_step) % 12 == 0:
-                    lr *= 1.5
                 last_params, last_eval, last_grad = params, eval, grad
             momentum = tree_map(lambda m, g: m_lr * m + g, momentum, grad)
             params = tree_map(lambda p, m: p + lr * m, params, momentum)
-    return Model(rating=params['rating'], player_name=data.player_name)
+
+        max_d_rating = jnp.max(
+            jnp.abs(params['rating'] - last_params['rating']))
+
+        if config.do_log:
+            g = jnp.linalg.norm(grad['rating'])
+            print(
+                f'Step {i:4}: eval: {jnp.exp2(eval):0.12f} lr={lr: 4.4f} grad={g:2.4f} delta={max_d_rating}')
+
+        if max_d_rating < 1e-15:
+            break
+
+        lr *= 1.5 ** (1.0 / 12)
+
+    def postprocess():
+        rating = {}
+        for id, name in enumerate(data.player_name):
+            rating[name] = {}
+            for season in range(season_count):
+                rating[name][season] = float(params['rating'][id, season])
+        ret = Model(rating=rating)
+        return ret
+
+    return postprocess()
 
 
 def data_from_dicts(matches) -> MatchResultArrays:
