@@ -162,21 +162,21 @@ def fit(
     lr = config.initial_lr
     momentum = tree_map(jnp.zeros_like, params)
     last_params = params
-    last_eval = -1
+    last_eval = -2  # eval of initial data is -1
     last_grad = tree_map(jnp.zeros_like, params)
     last_reset_step = 0
 
     for i in range(config.max_steps):
         (eval, model_fit), grad = jax.value_and_grad(model, has_aux=True)(params)
 
+        ratings = grad['rating']
+        q = jnp.sum(params['rating'] == last_params['rating']
+                    ) / params['rating'].size
         if config.do_log:
-            ratings = grad['rating']
-            q = jnp.sum(params['rating'] ==
-                        last_params['rating']) / params['rating'].size
-            if i > 100 and q > 0.9:
-                break
             print(
                 f'Step {i:4}: eval: {jnp.exp2(eval):0.12f} lr={lr:4.4f} grad={jnp.linalg.norm(ratings):2.4f} q={q:0.3f}')
+        if i > 1 and q > 0.99:
+            break
         if False:
             # Standard batch gradient descent algorithm works too. Just use good LR.
             params = tree_map(lambda p, g: p + lr * g, params, grad)

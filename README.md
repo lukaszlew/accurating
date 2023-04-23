@@ -41,7 +41,7 @@ The Chess ELO formula is $P(win) = 1 / (1 + 10^{d / 400})$
 
 ### Compared to EGD
 
-In EGD, winning odds for 100 points of rating is not fixed.
+[In EGD, winning odds for 100 points of rating is not fixed.](http://goratings.eu/Home/About)
 This is beacuse: 1 dan/kyu difference = 100 EGD = 1 handicap.
 The nature of Go is that 1 handicap (i.e. 100 EGD) means more on a dan level than on a kyu level.
 
