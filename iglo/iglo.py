@@ -62,16 +62,17 @@ def get_data(test):
     return data
 
 
-def get_data_new():
-    url = 'http://127.0.0.1:8000/api/ar-matches'
-    print(f'Requesting JSON from url: {url}')
-    return requests.get(url).json()
+def save_iglo_data_local(path):
+    with open(path, 'w') as f:
+        url = 'http://127.0.0.1:8000/api/ar-matches'
+        print(f'Requesting JSON from url: {url}')
+        json_str = requests.get(url).json()
+        json.dump(json_str, f)
 
 
 def save_iglo_data(path, test=False):
     with open(path, 'w') as f:
-        # json.dump(get_data(test), f)
-        json.dump(get_data_new(), f)
+        json.dump(get_data(test), f)
 
 
 def train_ielo(data_path, cfg_path, output_path):
@@ -94,15 +95,21 @@ def main(argv):
     if len(argv) == 1:
         print(f'Usage:')
         print(f'  ./iglo.py download matches.json')
-        print(f'  ./iglo.py download_test matches.json')
+        print(f'  ./iglo.py download_small matches.json')
+        print(f'  ./iglo.py download_local matches.json')
         print(f'  ./iglo.py ielo matches.json cfg.json ratings.json')
         return
     cmd = argv[1]
 
-    if cmd == 'download' or cmd == 'download_test':
+    if cmd == 'download' or cmd == 'download_small':
         assert len(argv) == 3
         data_path = argv[2]
-        save_iglo_data(data_path, test=(cmd == 'download_test'))
+        save_iglo_data(data_path, test=(cmd == 'download_small'))
+
+    elif cmd == 'download_local':
+        assert len(argv) == 3
+        data_path = argv[2]
+        save_iglo_data_local(data_path)
 
     elif cmd == 'ielo':
         assert len(argv) == 5
