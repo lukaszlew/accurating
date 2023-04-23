@@ -1,0 +1,7 @@
+{
+  "season_rating_stability": 0.5,
+  "smoothing": 0.1,
+  "max_steps": 10000,
+  "do_log": true,
+  "initial_lr": 1.0
+}
