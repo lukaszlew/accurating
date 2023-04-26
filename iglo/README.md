@@ -5,8 +5,7 @@ This is an application of [AccuRating](https://github.com/lukaszlew/accurating) 
 ## Usage
 
 ```bash
-$ ./iglo_data.py  # Downloads latest results from IGLO league to ./iglo.json
-$ ./elo.py        # Fits the model and saves the results to ./iglo_elo.json and to a formated table ./iglo_elo_table.txt
+$ ./iglo.py  # Shows usage
 ```
 
 ## What AccuRating ratings numbers mean exactly?
