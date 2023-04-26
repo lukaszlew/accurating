@@ -202,7 +202,8 @@ def fit(
         for id, name in enumerate(data.player_name):
             rating[name] = {}
             for season in range(season_count):
-                rating[name][season] = float(params['rating'][id, season])
+                rating[name][season] = float(
+                    params['rating'][id, season]) * 100.0
         ret = Model(rating=rating)
         return ret
 

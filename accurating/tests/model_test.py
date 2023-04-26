@@ -46,8 +46,8 @@ def test_fit():
     elos = np.array(elos)
 
     elos = elos - jnp.min(elos, axis=0, keepdims=True)
-    err = jnp.linalg.norm(elos - jnp.array(true_elos))
-    assert err < 0.000001, f'FAIL err={err}; results={model}'
+    err = jnp.linalg.norm(elos - jnp.array(true_elos) * 100.0)
+    assert err < 0.0001, f'FAIL err={err}; results={model}'
 
 
 def test_data_from_dicts():
@@ -97,9 +97,9 @@ def test_data_from_dicts():
     )
     model = accurating.fit(data, cfg)
     # ratings = np.array([[model.rating[pl][s] for s in range(len(season))] for pl in player_name])
-    assert_almost_equal(model.rating['Alusia'][0], -7.955777374991861e-17)
-    assert_almost_equal(model.rating['Alusia'][1], -9.539554751084385e-17)
-    assert_almost_equal(model.rating['Caesar'][0], -0.1345060654581596)
-    assert_almost_equal(model.rating['Caesar'][1], 0.2690122721761437)
-    assert_almost_equal(model.rating['Leon'][0], 0.1345060654581597)
-    assert_almost_equal(model.rating['Leon'][1], -0.26901227217614354)
+    assert_almost_equal(model.rating['Alusia'][0], 0.0)
+    assert_almost_equal(model.rating['Alusia'][1], 0.0)
+    assert_almost_equal(model.rating['Caesar'][0], -13.45060654581596)
+    assert_almost_equal(model.rating['Caesar'][1], 26.90122721761437)
+    assert_almost_equal(model.rating['Leon'][0], 13.45060654581597)
+    assert_almost_equal(model.rating['Leon'][1], -26.901227217614354)
