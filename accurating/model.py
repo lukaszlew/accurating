@@ -106,12 +106,13 @@ def fit(
     The time complexity is O(match_count * player_count * max(season) * steps)
     """
     p1_win_probs = data.p1_win_prob
-    p1_win_probs = (1 - config.smoothing) * \
-        p1_win_probs + config.smoothing * 0.5
-    p2_win_probs = 1.0 - data.p1_win_prob
     p1s = data.p1
     p2s = data.p2
     seasons = data.season
+
+    p1_win_probs = (1 - config.smoothing) * \
+        p1_win_probs + config.smoothing * 0.5
+    p2_win_probs = 1.0 - p1_win_probs
 
     player_count = jnp.maximum(jnp.max(p1s), jnp.max(p2s)) + 1
     season_count = jnp.max(seasons) + 1

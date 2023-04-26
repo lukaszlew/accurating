@@ -3,7 +3,7 @@ import json
 
 import jax.numpy as jnp
 import numpy as np
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal, assert_almost_equal
 
 
 def get_test_data(true_elos) -> accurating.MatchResultArrays:
@@ -27,7 +27,7 @@ def get_test_data(true_elos) -> accurating.MatchResultArrays:
         p2=jnp.array(p2s),
         p1_win_prob=jnp.array(p1_win_probs),
         season=jnp.array(seasons),
-        player_name=None,
+        player_name=[f'p{i}' for i in range(player_count)],
     )
 
 
@@ -41,7 +41,10 @@ def test_fit():
         do_log=True,
     )
     model = accurating.fit(test_data, config)
-    elos = model.rating
+    elos = [[model.rating[f'p{pl}'][season]
+             for season in range(2)] for pl in range(3)]
+    elos = np.array(elos)
+
     elos = elos - jnp.min(elos, axis=0, keepdims=True)
     err = jnp.linalg.norm(elos - jnp.array(true_elos))
     assert err < 0.000001, f'FAIL err={err}; results={model}'
@@ -88,9 +91,15 @@ def test_data_from_dicts():
     cfg = accurating.Config(
         season_rating_stability=0.5,
         smoothing=0.1,
-        max_steps=5,
+        max_steps=100,
         do_log=True,
         initial_lr=1.0,
     )
     model = accurating.fit(data, cfg)
-    del model
+    # ratings = np.array([[model.rating[pl][s] for s in range(len(season))] for pl in player_name])
+    assert_almost_equal(model.rating['Alusia'][0], -7.955777374991861e-17)
+    assert_almost_equal(model.rating['Alusia'][1], -9.539554751084385e-17)
+    assert_almost_equal(model.rating['Caesar'][0], -0.1345060654581596)
+    assert_almost_equal(model.rating['Caesar'][1], 0.2690122721761437)
+    assert_almost_equal(model.rating['Leon'][0], 0.1345060654581597)
+    assert_almost_equal(model.rating['Leon'][1], -0.26901227217614354)
