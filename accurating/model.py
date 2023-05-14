@@ -94,7 +94,7 @@ class Config:
 class Model:
     """Trained model."""
 
-    rating: dict[tuple[str, int], float]
+    rating: dict[str, dict[int, float]]
     """Player rating, indexed by name and season"""
 
 
@@ -150,7 +150,7 @@ def fit(
 
     # Optimize for these params:
     rating = jnp.zeros([player_count, season_count], dtype=jnp.float64)
-    params = dataclasses.asdict(Model(rating=rating))
+    params = { 'rating': rating }
     # 'consistency': jnp.zeros([player_count, season_count]),
 
     # Momentum gradient descent with restarts
