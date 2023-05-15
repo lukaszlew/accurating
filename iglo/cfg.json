@@ -1,7 +1,11 @@
 {
-  "season_rating_stability": 0.5,
-  "smoothing": 0.1,
+  "season_rating_stability": 1.0,
+  "smoothing": 0.15,
   "max_steps": 10000,
   "do_log": true,
-  "initial_lr": 1.0
+  "initial_lr": 1000.0,
+  "winner_prior_rating": 4000.0,
+  "winner_prior_match_count": 0.0,
+  "loser_prior_rating": 0.0,
+  "loser_prior_match_count": 0.0
 }
