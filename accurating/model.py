@@ -27,11 +27,11 @@ def log_win_prob(rating, opp_rating):
 
 
 def log_data_prob(p1_ratings, p2_ratings, p1_win_probs, p2_win_probs):
-    winner_win_prob_log = p1_win_probs * \
-        log_win_prob(p1_ratings, p2_ratings) + p2_win_probs * \
-        log_win_prob(p2_ratings, p1_ratings)
-    mean_log_data_prob = jnp.mean(winner_win_prob_log)
-    return mean_log_data_prob
+    log_data_prov_values = (
+        p1_win_probs * log_win_prob(p1_ratings, p2_ratings) +
+        p2_win_probs * log_win_prob(p2_ratings, p1_ratings)
+    )
+    return jnp.mean(log_data_prov_values)
 
 
 @dataclasses.dataclass
@@ -80,6 +80,11 @@ class Config:
     Smoothing essentially allows to specify that the looser (in every match) had a small chance of winning.
     This is also known as 'label smoothing'."""
 
+    winner_prior_rating: float = 1000.0
+    loser_prior_rating: float = 1000.0
+    winner_prior_match_count: float = 0.0
+    loser_prior_match_count: float = 0.0
+
     max_steps: int = 1_000_000
     """Limits the number of passes over the dataset."""
 
@@ -105,6 +110,8 @@ def fit(
     """Fits the model to data according to config.
     The time complexity is O(match_count * player_count * max(season) * steps)
     """
+    if config.do_log:
+        print(config)
     p1_win_probs = data.p1_win_prob
     p1s = data.p1
     p2s = data.p2
@@ -114,8 +121,8 @@ def fit(
         p1_win_probs + config.smoothing * 0.5
     p2_win_probs = 1.0 - p1_win_probs
 
-    player_count = jnp.maximum(jnp.max(p1s), jnp.max(p2s)) + 1
-    season_count = jnp.max(seasons) + 1
+    player_count = int(jnp.maximum(jnp.max(p1s), jnp.max(p2s)) + 1)
+    season_count = int(jnp.max(seasons) + 1)
 
     (data_size,) = p1s.shape
     assert seasons.shape == (data_size,)
@@ -124,6 +131,7 @@ def fit(
     assert p1_win_probs.shape == (data_size,)
 
     def model(params):
+        log_likelihood = 0.0
         ratings = params['rating']
         assert ratings.shape == (player_count, season_count)
         p1_ratings = ratings[p1s, seasons]
@@ -131,12 +139,21 @@ def fit(
 
         assert p1_ratings.shape == (data_size,)
         assert p2_ratings.shape == (data_size,)
-        mean_log_data_prob = log_data_prob(
-            p1_ratings, p2_ratings, p1_win_probs, p2_win_probs)
-        rating_season_divergence = config.season_rating_stability * \
-            jnp.mean((ratings[:, 1:] - ratings[:, :-1])**2)
+
+        mean_log_data_prob = log_data_prob(p1_ratings, p2_ratings, p1_win_probs, p2_win_probs)
+        log_likelihood += mean_log_data_prob
+
+        if config.season_rating_stability > 0.0:
+            log_likelihood -= config.season_rating_stability * jnp.mean((ratings[:, 1:] - ratings[:, :-1])**2)
+
+        if config.winner_prior_match_count > 0.0:
+            log_likelihood += log_data_prob(ratings, config.winner_prior_rating, 0.0, config.winner_prior_match_count)
+
+        if config.loser_prior_match_count > 0.0:
+            log_likelihood += log_data_prob(ratings, config.loser_prior_rating, config.loser_prior_match_count, 0.0)
+
         geomean_data_prob = jnp.exp2(mean_log_data_prob)
-        return mean_log_data_prob - rating_season_divergence, geomean_data_prob
+        return log_likelihood, geomean_data_prob
 
         # TODO: This is an experiment trying to evaluate ELO playing consistency. Try again and delete if does not work.
         # cons = params['consistency']
@@ -199,11 +216,18 @@ def fit(
 
     def postprocess():
         rating = {}
+        last_rating = []
         for id, name in enumerate(data.player_name):
             rating[name] = {}
             for season in range(season_count):
-                rating[name][season] = float(
-                    params['rating'][id, season]) * 100.0
+                rating[name][season] = float(params['rating'][id, season]) * 100.0
+            last_rating.append((rating[name][season_count - 1], name))
+        if config.do_log:
+            last_rating.sort(reverse=True)
+            print("Top 10 last season:")
+            for i in range(min(len(last_rating), 10)):
+                print(f'{last_rating[i][1]:30}: {last_rating[i][0]: 8.1f}')
+
         ret = Model(rating=rating)
         return ret
 

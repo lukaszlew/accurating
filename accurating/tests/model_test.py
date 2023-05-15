@@ -23,10 +23,10 @@ def get_test_data(true_elos) -> accurating.MatchResultArrays:
                 seasons.append(season)
 
     return accurating.MatchResultArrays(
-        p1=jnp.array(p1s),
-        p2=jnp.array(p2s),
-        p1_win_prob=jnp.array(p1_win_probs),
-        season=jnp.array(seasons),
+        p1=np.array(p1s),
+        p2=np.array(p2s),
+        p1_win_prob=np.array(p1_win_probs),
+        season=np.array(seasons),
         player_name=[f'p{i}' for i in range(player_count)],
     )
 
