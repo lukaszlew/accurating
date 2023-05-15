@@ -153,22 +153,22 @@ def fit(
 
         # We need to sum instead of averaging, because the more data we have, the more should it outweigh the priors
         # and even the season_rating_stability.
-        mean_log_data_prob = jnp.mean(log_data_prob(p1_ratings, p2_ratings, p1_win_probs, p2_win_probs))
+        mean_log_data_prob = jnp.sum(log_data_prob(p1_ratings, p2_ratings, p1_win_probs, p2_win_probs))
         log_likelihood += mean_log_data_prob
 
         if config.season_rating_stability > 0.0:
-            log_likelihood -= config.season_rating_stability * jnp.mean((ratings[:, 1:] - ratings[:, :-1])**2)
+            log_likelihood -= config.season_rating_stability * jnp.sum((ratings[:, 1:] - ratings[:, :-1])**2)
 
         if config.winner_prior_match_count > 0.0:
             winner_rating = config.winner_prior_rating / config.rating_difference_for_2_to_1_odds
-            log_likelihood += jnp.mean(log_data_prob(ratings, jnp.ones_like(ratings) * winner_rating, 0.0, config.winner_prior_match_count))
+            log_likelihood += jnp.sum(log_data_prob(ratings, jnp.ones_like(ratings) * winner_rating, 0.0, config.winner_prior_match_count))
 
         if config.loser_prior_match_count > 0.0:
             loser_rating = config.loser_prior_rating / config.rating_difference_for_2_to_1_odds
-            log_likelihood += jnp.mean(log_data_prob(ratings, jnp.ones_like(ratings) * loser_rating, config.loser_prior_match_count, 0.0))
+            log_likelihood += jnp.sum(log_data_prob(ratings, jnp.ones_like(ratings) * loser_rating, config.loser_prior_match_count, 0.0))
 
-        geomean_data_prob = jnp.exp2(mean_log_data_prob)
-        return log_likelihood, geomean_data_prob
+        geomean_data_prob = jnp.exp2(mean_log_data_prob / data_size)
+        return log_likelihood / data_size, geomean_data_prob
 
         # TODO: This is an experiment trying to evaluate ELO playing consistency. Try again and delete if does not work.
         # cons = params['consistency']
@@ -178,7 +178,7 @@ def fit(
         # winner_win_prob_log += p1_win_probs * log_win_prob_diff(diff/jnp.exp(p1_cons)) + p2_win_probs * log_win_prob_diff(-diff/jnp.exp(p1_cons))
         # winner_win_prob_log += p1_win_probs * log_win_prob_diff(diff/jnp.exp(p2_cons)) + p2_win_probs * log_win_prob_diff(-diff/jnp.exp(p2_cons))
         # winner_win_prob_log /= 2
-        # return jnp.mean(winner_win_prob_log) - 0.005*jnp.mean(cons ** 2)
+        # return jnp.sum(winner_win_prob_log) - 0.005*jnp.sum(cons ** 2) # or mean?
 
     # Optimize for these params:
     rating = jnp.zeros([player_count, season_count], dtype=jnp.float64)
@@ -222,7 +222,7 @@ def fit(
         if config.do_log:
             g = jnp.linalg.norm(grad['rating'])
             print(
-                f'Step {i:4}: eval: {jnp.exp2(eval):0.12f} lr={lr: 4.4f} grad={g:2.4f} delta={max_d_rating}')
+                f'Step {i:4}: eval={jnp.exp2(eval):0.12f} pred_power={model_fit:0.6f} lr={lr: 4.4f} grad={g:2.4f} delta={max_d_rating}')
 
         if max_d_rating < 1e-15:
             break

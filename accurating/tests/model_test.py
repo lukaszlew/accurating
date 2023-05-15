@@ -99,7 +99,8 @@ def test_data_from_dicts():
     # ratings = np.array([[model.rating[pl][s] for s in range(len(season))] for pl in player_name])
     assert_almost_equal(model.rating['Alusia'][0], 0.0)
     assert_almost_equal(model.rating['Alusia'][1], 0.0)
-    assert_almost_equal(model.rating['Caesar'][0], -13.45060654581596)
-    assert_almost_equal(model.rating['Caesar'][1], 26.90122721761437)
-    assert_almost_equal(model.rating['Leon'][0], 13.45060654581597)
-    assert_almost_equal(model.rating['Leon'][1], -26.901227217614354)
+
+    assert_almost_equal(model.rating['Caesar'][0], -13.450609811847375)
+    assert_almost_equal(model.rating['Caesar'][1], 26.90122355078518)
+    assert_almost_equal(model.rating['Leon'][0], 13.450609811847375)
+    assert_almost_equal(model.rating['Leon'][1], -26.90122355078518)
