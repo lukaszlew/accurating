@@ -8,6 +8,7 @@ import jax
 import jax.numpy as jnp
 from jax.tree_util import tree_map
 from jax.config import config
+from tabulate import tabulate
 
 config.update("jax_numpy_rank_promotion", "raise")  # bug prevention
 config.update("jax_enable_x64", True)  # better model accuracy
@@ -238,10 +239,18 @@ def fit(
                 rating[name][season] = float(params['rating'][id, season]) * config.rating_difference_for_2_to_1_odds
             last_rating.append((rating[name][season_count - 1], name))
         if config.do_log:
+            headers = ['Nick']
+            for season in range(season_count-1, -1, -1):
+                headers.append(f'S{season}')
             last_rating.sort(reverse=True)
-            print("Top 10 last season:")
-            for i in range(min(len(last_rating), 10)):
-                print(f'{last_rating[i][1]:30}: {last_rating[i][0]: 8.1f}')
+            table = []
+            for _, name in last_rating:
+                if len(table) > 10: break # max rows
+                row = [name]
+                for season in range(season_count-1, 0, -1):
+                    row.append(rating[name][season])
+                table.append(row)
+            print(tabulate(table, headers=headers, floatfmt=".1f", numalign="decimal"))
 
         return Model(rating=rating)
 
