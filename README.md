@@ -24,7 +24,7 @@ Only differences matter, i.e. adding say 100 to all the ratings would yield equa
 
 - 100 AccuRating point difference is 1:2 win odds (33% vs 66%)
 - 200 AccuRating point difference is 1:5 win odds (20% vs 80%)
-- 300 AccuRating point difference is 1:10 win odds (10% vs 90%)
+- 300 AccuRating point difference is 1:9 win odds (11% vs 89%)
 
 The exact formula is $P(win) = 1 / (1 + 2^{d / 100})$.
 Optimization algorithm find ratings that maximize probability of the data.
@@ -35,7 +35,7 @@ Chess ELO is similar, but the points are rescaled by 1.20412:
 
 - 120.412 chess ELO difference for 1:2 win odds (33% vs 66%)
 - 240.824 chess ELO difference for 1:5 win odds (20% vs 80%)
-- 361.236 chess ELO difference for 1:10 win odds (10% vs 90%)
+- 361.236 chess ELO difference for 1:9 win odds (11% vs 89%)
 
 The Chess ELO formula is $P(win) = 1 / (1 + 10^{d / 400})$
 
@@ -49,13 +49,13 @@ On the dan level:
 
 - 90 EGD point difference is approximately 1:2 win odds (33% vs 66%)
 - 180 EGD point difference is approximately 1:5 win odds (20% vs 80%)
-- 270 EGD point difference is approximately 1:10 win odds (10% vs 90%)
+- 270 EGD point difference is approximately 1:9 win odds (11% vs 89%)
 
 On the kyu level:
 
 - 300 EGD point difference is approximately 1:2 win odds (33% vs 66%)
 - 600 EGD point difference is approximately 1:5 win odds (20% vs 80%)
-- 900 EGD point difference is approximately 1:10 win odds (10% vs 90%)
+- 900 EGD point difference is approximately 1:9 win odds (11% vs 89%)
 
 [Based on these tables.](https://www.europeangodatabase.eu/EGD/winning_stats.php)
 

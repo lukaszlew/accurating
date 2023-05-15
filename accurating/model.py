@@ -31,7 +31,7 @@ def log_data_prob(p1_ratings, p2_ratings, p1_win_probs, p2_win_probs):
         p1_win_probs * log_win_prob(p1_ratings, p2_ratings) +
         p2_win_probs * log_win_prob(p2_ratings, p1_ratings)
     )
-    return jnp.mean(log_data_prov_values)
+    return log_data_prov_values
 
 
 @dataclasses.dataclass
@@ -80,10 +80,15 @@ class Config:
     Smoothing essentially allows to specify that the looser (in every match) had a small chance of winning.
     This is also known as 'label smoothing'."""
 
-    winner_prior_rating: float = 1000.0
-    loser_prior_rating: float = 1000.0
+    winner_prior_rating: float = 4000.0
     winner_prior_match_count: float = 0.0
+    loser_prior_rating: float = 1000.0
     loser_prior_match_count: float = 0.0
+    """Adds two virtual players with a fixed ratings of winner_prior_rating and loser_prior_rating that will always win and always lose.
+    Adds to the data set, for every player and *every season*, winner_prior_match_count (loser_prior_match_count) games with them.
+    The match_counts should be much smaller than the actual number of matches that players played.
+    If match_counts are set to 0.0 the prior is disabled and so the resulting ratings float (can be shifted as a whole by a constant).
+    """
 
     max_steps: int = 1_000_000
     """Limits the number of passes over the dataset."""
@@ -93,6 +98,12 @@ class Config:
 
     initial_lr: float = 10000.0
     """It is automatically adjusted, but sometimes it is too large and blows up."""
+
+    rating_difference_for_2_to_1_odds: float = 100.0
+    """That many points difference creates 2:1 win odds.
+    Twice the difference predicts 5:1 odds.
+    You can change it to 120.412 to match chess ELO scale.
+    Apart from rescaling the final result, it also rescales prior_ratings in this config above."""
 
 
 @dataclasses.dataclass
@@ -140,17 +151,21 @@ def fit(
         assert p1_ratings.shape == (data_size,)
         assert p2_ratings.shape == (data_size,)
 
-        mean_log_data_prob = log_data_prob(p1_ratings, p2_ratings, p1_win_probs, p2_win_probs)
+        # We need to sum instead of averaging, because the more data we have, the more should it outweigh the priors
+        # and even the season_rating_stability.
+        mean_log_data_prob = jnp.mean(log_data_prob(p1_ratings, p2_ratings, p1_win_probs, p2_win_probs))
         log_likelihood += mean_log_data_prob
 
         if config.season_rating_stability > 0.0:
             log_likelihood -= config.season_rating_stability * jnp.mean((ratings[:, 1:] - ratings[:, :-1])**2)
 
         if config.winner_prior_match_count > 0.0:
-            log_likelihood += log_data_prob(ratings, config.winner_prior_rating, 0.0, config.winner_prior_match_count)
+            winner_rating = config.winner_prior_rating / config.rating_difference_for_2_to_1_odds
+            log_likelihood += jnp.mean(log_data_prob(ratings, jnp.ones_like(ratings) * winner_rating, 0.0, config.winner_prior_match_count))
 
         if config.loser_prior_match_count > 0.0:
-            log_likelihood += log_data_prob(ratings, config.loser_prior_rating, config.loser_prior_match_count, 0.0)
+            loser_rating = config.loser_prior_rating / config.rating_difference_for_2_to_1_odds
+            log_likelihood += jnp.mean(log_data_prob(ratings, jnp.ones_like(ratings) * loser_rating, config.loser_prior_match_count, 0.0))
 
         geomean_data_prob = jnp.exp2(mean_log_data_prob)
         return log_likelihood, geomean_data_prob
@@ -175,7 +190,7 @@ def fit(
     lr = float(config.initial_lr)
     momentum = tree_map(jnp.zeros_like, params)
     last_params = params
-    last_eval = -2  # eval of initial data is -1
+    last_eval = -1e8  # eval of initial data is -1, but regularizations might push it lower.
     last_grad = tree_map(jnp.zeros_like, params)
     last_reset_step = 0
 
@@ -220,7 +235,7 @@ def fit(
         for id, name in enumerate(data.player_name):
             rating[name] = {}
             for season in range(season_count):
-                rating[name][season] = float(params['rating'][id, season]) * 100.0
+                rating[name][season] = float(params['rating'][id, season]) * config.rating_difference_for_2_to_1_odds
             last_rating.append((rating[name][season_count - 1], name))
         if config.do_log:
             last_rating.sort(reverse=True)
@@ -228,8 +243,7 @@ def fit(
             for i in range(min(len(last_rating), 10)):
                 print(f'{last_rating[i][1]:30}: {last_rating[i][0]: 8.1f}')
 
-        ret = Model(rating=rating)
-        return ret
+        return Model(rating=rating)
 
     return postprocess()
 
