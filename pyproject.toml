@@ -11,6 +11,7 @@ documentation = "https://lukaszlew.github.io/accurating/"
 python = "^3.10"
 jax = "^0.4.8"
 jaxlib = "^0.4.7"
+types-requests = "^2.30.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pdoc = "^13.1.0"

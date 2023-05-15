@@ -128,9 +128,7 @@ This repo implements:
 git clone https://github.com/lukaszlew/accurating
 poetry install
 poetry run pytest
-# TODO(lew): Should automate it somehow.
-poetry run mypy accurating/model.py
-poetry run mypy accurating/tests/model_test.py
+poetry run mypy .
 # edit stuff; increase version
 poetry build
 poetry publish
