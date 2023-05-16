@@ -18,6 +18,8 @@ AccuRating shows that we need about 1500 - 2000 passes over the data to converge
 
 AccuRating is a variant of [Whole-History-Rating](https://www.remi-coulom.fr/WHR/), which is also used at https://www.goratings.org/.
 
+[Interesting discussion](https://www.mail-archive.com/computer-go@computer-go.org/msg07781.html) on why WHR is good.
+
 ## What AccuRating ratings numbers mean exactly?
 
 Only differences matter, i.e. adding say 100 to all the ratings would yield equally valid points.

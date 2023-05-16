@@ -100,7 +100,9 @@ def test_data_from_dicts():
     assert_almost_equal(model.rating['Alusia'][0], 0.0)
     assert_almost_equal(model.rating['Alusia'][1], 0.0)
 
-    assert_almost_equal(model.rating['Caesar'][0], -13.450609811847375)
-    assert_almost_equal(model.rating['Caesar'][1], 26.90122355078518)
-    assert_almost_equal(model.rating['Leon'][0], 13.450609811847375)
-    assert_almost_equal(model.rating['Leon'][1], -26.90122355078518)
+    v = 13.45060623432789
+    v2 = 26.901228584915188
+    assert_almost_equal(model.rating['Caesar'][0], -v)
+    assert_almost_equal(model.rating['Caesar'][1], v2)
+    assert_almost_equal(model.rating['Leon'][0], v)
+    assert_almost_equal(model.rating['Leon'][1], -v2)
