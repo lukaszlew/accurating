@@ -142,6 +142,9 @@ def fit(
     assert p2s.shape == (data_size,)
     assert p1_win_probs.shape == (data_size,)
 
+    winner_prior = config.winner_prior_rating / config.rating_difference_for_2_to_1_odds
+    loser_prior = config.loser_prior_rating / config.rating_difference_for_2_to_1_odds
+
     def model(params):
         log_likelihood = 0.0
         ratings = params['rating']
@@ -161,12 +164,10 @@ def fit(
             log_likelihood -= config.season_rating_stability * jnp.sum((ratings[:, 1:] - ratings[:, :-1])**2)
 
         if config.winner_prior_match_count > 0.0:
-            winner_rating = config.winner_prior_rating / config.rating_difference_for_2_to_1_odds
-            log_likelihood += jnp.sum(log_data_prob(ratings, jnp.ones_like(ratings) * winner_rating, 0.0, config.winner_prior_match_count))
+            log_likelihood += jnp.sum(log_data_prob(ratings, jnp.ones_like(ratings) * winner_prior, 0.0, config.winner_prior_match_count))
 
         if config.loser_prior_match_count > 0.0:
-            loser_rating = config.loser_prior_rating / config.rating_difference_for_2_to_1_odds
-            log_likelihood += jnp.sum(log_data_prob(ratings, jnp.ones_like(ratings) * loser_rating, config.loser_prior_match_count, 0.0))
+            log_likelihood += jnp.sum(log_data_prob(ratings, jnp.ones_like(ratings) * loser_prior, config.loser_prior_match_count, 0.0))
 
         geomean_data_prob = jnp.exp2(mean_log_data_prob / data_size)
         return log_likelihood / data_size, geomean_data_prob
@@ -182,7 +183,7 @@ def fit(
         # return jnp.sum(winner_win_prob_log) - 0.005*jnp.sum(cons ** 2) # or mean?
 
     # Optimize for these params:
-    rating = jnp.zeros([player_count, season_count], dtype=jnp.float64)
+    rating = jnp.zeros([player_count, season_count], dtype=jnp.float64) + (loser_prior + winner_prior) / 2.0
     params = { 'rating': rating }
     # 'consistency': jnp.zeros([player_count, season_count]),
 
@@ -245,7 +246,7 @@ def fit(
             last_rating.sort(reverse=True)
             table = []
             for _, name in last_rating:
-                if len(table) > 10: break # max rows
+                # if len(table) > 10: break # max rows
                 row = [name]
                 for season in range(season_count-1, 0, -1):
                     row.append(rating[name][season])

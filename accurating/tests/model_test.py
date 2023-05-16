@@ -96,6 +96,7 @@ def test_data_from_dicts():
         initial_lr=1.0,
     )
     model = accurating.fit(data, cfg)
+
     # ratings = np.array([[model.rating[pl][s] for s in range(len(season))] for pl in player_name])
     assert_almost_equal(model.rating['Alusia'][0], 0.0)
     assert_almost_equal(model.rating['Alusia'][1], 0.0)
