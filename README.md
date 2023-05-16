@@ -131,6 +131,7 @@ git clone https://github.com/lukaszlew/accurating
 poetry install
 poetry run pytest
 poetry run mypy .
+
 # edit stuff; increase version
 poetry build
 poetry publish
