@@ -127,6 +127,10 @@ This repo implements:
 ## Development
 
 ```shell
+git config --global core.hooksPath .githooks/
+```
+
+```shell
 git clone https://github.com/lukaszlew/accurating
 poetry install
 poetry run pytest

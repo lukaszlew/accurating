@@ -1,0 +1,5 @@
+#!/bin/sh -eu
+
+poetry run mypy .
+
+poetry run pytest
