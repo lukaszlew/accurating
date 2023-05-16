@@ -94,6 +94,9 @@ def test_data_from_dicts():
         max_steps=100,
         do_log=True,
         initial_lr=1.0,
+        winner_prior_rating=0.,
+        loser_prior_rating=0.,
+
     )
     model = accurating.fit(data, cfg)
 
