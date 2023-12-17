@@ -95,18 +95,18 @@ def main(argv):
     if len(argv) == 1:
         print(f'Usage:')
         print(f'  ./iglo.py download matches.json')
-        print(f'  ./iglo.py download_small matches.json')
-        print(f'  ./iglo.py download_local matches.json')
+        print(f'  ./iglo.py download_test matches.json        # used for accurating testing')
+        print(f'  ./iglo.py download_local_iglo matches.json  # used for IGLO development')
         print(f'  ./iglo.py ielo matches.json cfg.json ratings.json')
         return
     cmd = argv[1]
 
-    if cmd == 'download' or cmd == 'download_small':
+    if cmd == 'download' or cmd == 'download_test':
         assert len(argv) == 3
         data_path = argv[2]
-        save_iglo_data(data_path, test=(cmd == 'download_small'))
+        save_iglo_data(data_path, test=(cmd == 'download_test'))
 
-    elif cmd == 'download_local':
+    elif cmd == 'download_local_iglo':
         assert len(argv) == 3
         data_path = argv[2]
         save_iglo_data_local(data_path)
