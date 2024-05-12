@@ -145,9 +145,12 @@ def fit(
     winner_prior = config.winner_prior_rating / config.rating_difference_for_2_to_1_odds
     loser_prior = config.loser_prior_rating / config.rating_difference_for_2_to_1_odds
 
+    def get_ratings(p):
+        return p['season_rating'] + p['shared_rating']
+
     def model(params):
         log_likelihood = 0.0
-        ratings = params['rating']
+        ratings = get_ratings(params)
         assert ratings.shape == (player_count, season_count)
         p1_ratings = ratings[p1s, seasons]
         p2_ratings = ratings[p2s, seasons]
@@ -183,8 +186,9 @@ def fit(
         # return jnp.sum(winner_win_prob_log) - 0.005*jnp.sum(cons ** 2) # or mean?
 
     # Optimize for these params:
-    rating = jnp.zeros([player_count, season_count], dtype=jnp.float64) + (loser_prior + winner_prior) / 2.0
-    params = { 'rating': rating }
+    shared_rating = jnp.zeros([player_count, 1], dtype=jnp.float64) + (loser_prior + winner_prior) / 2.0
+    season_rating = jnp.zeros([player_count, season_count], dtype=jnp.float64)
+    params = { 'season_rating': season_rating, 'shared_rating': shared_rating }
     # 'consistency': jnp.zeros([player_count, season_count]),
 
     # Momentum gradient descent with restarts
@@ -195,6 +199,7 @@ def fit(
     last_eval = -1e8  # eval of initial data is -1, but regularizations might push it lower.
     last_grad = tree_map(jnp.zeros_like, params)
     last_reset_step = 0
+
 
     for i in range(config.max_steps):
         (eval, model_fit), grad = jax.value_and_grad(model, has_aux=True)(params)
@@ -219,12 +224,13 @@ def fit(
             params = tree_map(lambda p, m: p + lr * m, params, momentum)
 
         max_d_rating = jnp.max(
-            jnp.abs(params['rating'] - last_params['rating']))
+            jnp.abs(get_ratings(params) - get_ratings(last_params)))
 
         if config.do_log:
-            g = jnp.linalg.norm(grad['rating'])
+            g = get_ratings(grad)
+            g = jnp.sqrt(jnp.mean(g*g))
             print(
-                f'Step {i:4}: eval={jnp.exp2(eval):0.12f} pred_power={model_fit:0.6f} lr={lr: 4.4f} grad={g:2.4f} delta={max_d_rating}')
+                f'Step {i:4}: eval={jnp.exp2(eval):0.12f} pred_power={model_fit:0.6f} lr={lr: 4.4f} grad={g:2.8f} delta={max_d_rating}')
 
         if max_d_rating < 1e-15:
             break
@@ -237,7 +243,7 @@ def fit(
         for id, name in enumerate(data.player_name):
             rating[name] = {}
             for season in range(season_count):
-                rating[name][season] = float(params['rating'][id, season]) * config.rating_difference_for_2_to_1_odds
+                rating[name][season] = float(get_ratings(params)[id, season]) * config.rating_difference_for_2_to_1_odds
             last_rating.append((rating[name][season_count - 1], name))
         if config.do_log:
             headers = ['Nick']

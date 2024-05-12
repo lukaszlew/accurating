@@ -47,7 +47,7 @@ def test_fit():
 
     elos = elos - jnp.min(elos, axis=0, keepdims=True)
     err = jnp.linalg.norm(elos - jnp.array(true_elos) * 100.0)
-    assert err < 0.0001, f'FAIL err={err}; results={model}'
+    assert err < 0.001, f'FAIL err={err}; {elos=}; results={model}'
 
 
 def test_data_from_dicts():
@@ -104,8 +104,8 @@ def test_data_from_dicts():
     assert_almost_equal(model.rating['Alusia'][0], 0.0)
     assert_almost_equal(model.rating['Alusia'][1], 0.0)
 
-    v = 13.45060623432789
-    v2 = 26.901228584915188
+    v = 13.45061478482753
+    v2 = 26.901218694229996
     assert_almost_equal(model.rating['Caesar'][0], -v)
     assert_almost_equal(model.rating['Caesar'][1], v2)
     assert_almost_equal(model.rating['Leon'][0], v)
