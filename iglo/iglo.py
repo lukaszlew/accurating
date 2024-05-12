@@ -13,7 +13,12 @@ def request(s, url):
     print(f'getting {s}')
     return requests.get(f'{url}/{s}').json()['results']
 
+def get_data2(test):
+    url = 'https://iglo.szalenisamuraje.org/api/igor-matches'
+    data = requests.get(f'{url}').json()
+    return data
 
+# Deprecated
 def get_data(test):
     url = 'https://iglo.szalenisamuraje.org/api'
     data = []
@@ -72,7 +77,7 @@ def save_iglo_data_local(path):
 
 def save_iglo_data(path, test=False):
     with open(path, 'w') as f:
-        json.dump(get_data(test), f)
+        json.dump(get_data2(test), f)
 
 
 def train_ielo(data_path, cfg_path, output_path):

@@ -132,6 +132,9 @@ git config --global core.hooksPath .githooks/
 
 ```shell
 git clone https://github.com/lukaszlew/accurating
+virtualenv /tmp/venv
+source /tmp/venv/bin/activate
+pip install poetry
 poetry install
 poetry run pytest
 poetry run mypy .
