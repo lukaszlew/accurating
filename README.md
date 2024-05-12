@@ -138,8 +138,12 @@ pip install poetry
 poetry install
 poetry run pytest
 poetry run mypy .
+```
 
+## Publish package
+```shell
 # edit stuff; increase version
 poetry build
+poetry config pypi-token.pypi [token]
 poetry publish
 ```
