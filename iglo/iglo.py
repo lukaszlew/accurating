@@ -80,7 +80,7 @@ def save_iglo_data(path, test=False):
         json.dump(get_data2(test), f)
 
 
-def train_ielo(data_path, cfg_path, output_path):
+def train_ielo(data_path, cfg_path, output_path, igor_path):
     with open(data_path, 'r') as f:
         data_dicts = json.load(f)
         data = accurating.data_from_dicts(data_dicts)
@@ -93,6 +93,10 @@ def train_ielo(data_path, cfg_path, output_path):
     with open(output_path, 'w') as f:
         json.dump(dataclasses.asdict(model), f)
 
+    with open(igor_path, 'w') as f:
+        f.write(model.tabulate())
+        f.write("\n")
+
     return model
 
 
@@ -102,7 +106,7 @@ def main(argv):
         print(f'  ./iglo.py download matches.json')
         print(f'  ./iglo.py download_test matches.json        # used for accurating testing')
         print(f'  ./iglo.py download_local_iglo matches.json  # used for IGLO development')
-        print(f'  ./iglo.py ielo matches.json cfg.json ratings.json')
+        print(f'  ./iglo.py ielo matches.json cfg.json ratings.json igor.txt')
         return
     cmd = argv[1]
 
@@ -117,11 +121,12 @@ def main(argv):
         save_iglo_data_local(data_path)
 
     elif cmd == 'ielo':
-        assert len(argv) == 5
+        assert len(argv) == 6
         data_path = argv[2]
         cfg_path = argv[3]
         output_path = argv[4]
-        train_ielo(data_path, cfg_path, output_path)
+        igor_path = argv[5]
+        train_ielo(data_path, cfg_path, output_path, igor_path)
 
     else:
         print(f'No such command: {cmd}')

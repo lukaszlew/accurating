@@ -114,6 +114,31 @@ class Model:
     rating: dict[str, dict[int, float]]
     """Player rating, indexed by name and season"""
 
+    def tabulate(self):
+        last_rating = []
+        min_season, max_season = None, None
+        for name, ratings in self.rating.items():
+            assert min_season in [None, min(ratings.keys())]
+            assert max_season in [None, max(ratings.keys())]
+            min_season = min(ratings.keys())
+            max_season = max(ratings.keys())
+            last_rating.append((ratings[max_season], name))
+        if min_season == None:
+            return ""
+        min_season += 1  # Skip season no 0
+        last_rating.sort(reverse=True)
+        headers = ['Nick']
+        for season in range(max_season, min_season-1, -1):
+            headers.append(f'S{season}')
+        table = []
+        for _, name in last_rating:
+            # if len(table) > 10: break # max rows
+            row = [name]
+            for season in range(max_season, min_season-1, -1):
+                row.append(self.rating[name][season])
+            table.append(row)
+        return tabulate(table, headers=headers, floatfmt=".1f", numalign="decimal")
+
 
 def fit(
     data: MatchResultArrays,
@@ -239,30 +264,16 @@ def fit(
 
     def postprocess():
         rating = {}
-        last_rating = []
         for id, name in enumerate(data.player_name):
             rating[name] = {}
             for season in range(season_count):
                 rating[name][season] = float(get_ratings(params)[id, season]) * config.rating_difference_for_2_to_1_odds
-            last_rating.append((rating[name][season_count - 1], name))
+        model = Model(rating=rating)
         if config.do_log:
-            headers = ['Nick']
-            for season in range(season_count-1, -1, -1):
-                headers.append(f'S{season}')
-            last_rating.sort(reverse=True)
-            table = []
-            for _, name in last_rating:
-                # if len(table) > 10: break # max rows
-                row = [name]
-                for season in range(season_count-1, 0, -1):
-                    row.append(rating[name][season])
-                table.append(row)
-            print(tabulate(table, headers=headers, floatfmt=".1f", numalign="decimal"))
-
-        return Model(rating=rating)
+            print(model.tabulate())
+        return model
 
     return postprocess()
-
 
 def data_from_dicts(matches) -> MatchResultArrays:
     player_set = set()
