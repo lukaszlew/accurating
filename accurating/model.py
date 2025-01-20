@@ -7,7 +7,7 @@ import dataclasses
 import jax
 import jax.numpy as jnp
 from jax.tree_util import tree_map
-from jax.config import config
+from jax import config
 from tabulate import tabulate
 
 config.update("jax_numpy_rank_promotion", "raise")  # bug prevention
