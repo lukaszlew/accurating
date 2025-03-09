@@ -140,6 +140,12 @@ poetry run pytest
 poetry run mypy .
 ```
 
+Testing with iglo use-case:
+```shell
+poetry run python iglo/iglo.py download iglo/matches.json
+poetry run python iglo/iglo.py ielo iglo/matches.json iglo/cfg.json iglo/ratings.json iglo/igor.txt
+```
+
 ## Publish package
 ```shell
 # edit stuff; increase version
