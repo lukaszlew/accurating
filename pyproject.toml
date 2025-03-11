@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "AccuRating"
-version = "0.6.1"
+version = "0.7.0"
 description = "AccuRating is a library for accurate player ranking based on match results."
 authors = ["Lukasz Lew <lukasz.lew@gmail.com>"]
 readme = "README.md"
