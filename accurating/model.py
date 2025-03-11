@@ -69,17 +69,14 @@ class Config:
     season_rating_stability = inf means that ratings at each season should be the same."""
 
     smoothing: float
-    """ Balance between match results and player pairings as the sources of data.
-    There are two sources of data:
-    - Match result: Winner probably has a higher rating than the looser.
-    - Player pairing: Matched players probably have similar strength.
-    Setting smoothing to 0.0 ignorse player pairing as and would rely on the match result only.
-    Setting smoothing to 1.0 ignorse match result would rely on player pairing only.
-
-    Typically, in the absence of data ratings assume a prior that the skill of a player some fixed value like 1000.
-    This allows the rating to not escape to infinity when only losses or only wins are available.
-    Smoothing essentially allows to specify that the looser (in every match) had a small chance of winning.
-    This is also known as 'label smoothing'."""
+    """ If a player had only wins or only losses in a given season, smoothing will be applied.
+    Say a player had N=4 games, all wins (Let's call it 4 points).
+    Smoothing s=0 means that we use the data as is,
+    but this will result in a very high rating as there is no data constraining the rating of this player.
+    Smoothing=1.0, (which is way to high), would cause all these 4 games act as draws (say 2 points).
+    In a typical situation we would like the smoothing to have like "0.5 point", so typical good setting is smoothing=1/N.
+    In our example each game would act 1/4 as draw and 3/4 as win, leading to "3.5 points".
+    """
 
     winner_prior_rating: float = 4000.0
     winner_prior_match_count: float = 0.0
@@ -140,6 +137,70 @@ class Model:
         return tabulate(table, headers=headers, floatfmt=".1f", numalign="decimal")
 
 
+def apply_selective_smoothing(p1s, p2s, seasons, p1_win_probs, smoothing_factor, do_log):
+    """Apply smoothing only to players who have all wins or all losses in a season.
+
+    Args:
+        p1s: Array of player 1 IDs
+        p2s: Array of player 2 IDs
+        seasons: Array of season numbers
+        p1_win_probs: Array of probabilities that player 1 wins
+        smoothing_factor: Smoothing factor to apply (between 0 and 1)
+
+    Returns:
+        Tuple of (p1_win_probs, p2_win_probs) with selective smoothing applied
+    """
+    season_player_records = {}  # season -> player_id -> [win_count, loss_count]
+
+    # Helper function to update player records within the main function
+    def update_player_record(season, player_id, win_prob):
+        if season not in season_player_records:
+            season_player_records[season] = {}
+
+        if player_id not in season_player_records[season]:
+            season_player_records[season][player_id] = [0., 0.]  # [wins, losses]
+
+        season_player_records[season][player_id][0] += win_prob
+        season_player_records[season][player_id][1] += 1.0 - win_prob
+
+    # Create a copy to avoid modifying the original
+    p1_win_probs_smoothed = np.copy(p1_win_probs)
+
+    # Count wins and losses for each player in each season
+    for i in range(len(p1s)):
+        p1_id = p1s[i]
+        p2_id = p2s[i]
+        season = seasons[i]
+
+        # Update records for both players
+        update_player_record(season, p1_id, p1_win_probs[i])
+        update_player_record(season, p2_id, 1.0 - p1_win_probs[i])
+
+    # Create a set of (player, season) pairs that need smoothing
+    # (those with only wins or only losses)
+    need_smoothing = set()
+    for season, players in season_player_records.items():
+        for player_id, record in players.items():
+            win_count, loss_count = record
+            if win_count == 0 or loss_count == 0:  # All losses or all wins
+                if do_log:
+                    print(f"Adding smoothing {player_id=}, {season=}")
+                need_smoothing.add((player_id, season))
+
+    # Apply smoothing only to matches where at least one player needs it
+    for i in range(len(p1s)):
+        p1_id = p1s[i]
+        p2_id = p2s[i]
+        season = seasons[i]
+
+        # Check if either player needs smoothing for this season
+        if (p1_id, season) in need_smoothing or (p2_id, season) in need_smoothing:
+            p1_win_probs_smoothed[i] = (1 - smoothing_factor) * p1_win_probs[i] + smoothing_factor * 0.5
+
+    p2_win_probs_smoothed = 1.0 - p1_win_probs_smoothed
+    return p1_win_probs_smoothed, p2_win_probs_smoothed
+
+
 def fit(
     data: MatchResultArrays,
     config: Config,
@@ -149,14 +210,14 @@ def fit(
     """
     if config.do_log:
         print(config)
-    p1_win_probs = data.p1_win_prob
     p1s = data.p1
     p2s = data.p2
     seasons = data.season
 
-    p1_win_probs = (1 - config.smoothing) * \
-        p1_win_probs + config.smoothing * 0.5
-    p2_win_probs = 1.0 - p1_win_probs
+    # Apply selective smoothing
+    p1_win_probs, p2_win_probs = apply_selective_smoothing(
+        p1s, p2s, seasons, data.p1_win_prob, config.smoothing, config.do_log
+    )
 
     player_count = int(jnp.maximum(jnp.max(p1s), jnp.max(p2s)) + 1)
     season_count = int(jnp.max(seasons) + 1)
